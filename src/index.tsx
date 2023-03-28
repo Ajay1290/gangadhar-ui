@@ -33,13 +33,13 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  // <React.StrictMode>
-  <Provider store={store}>
-    <HelmetProvider>
-      <App />
-    </HelmetProvider>
-  </Provider>,
-  // </React.StrictMode>,
+  <React.StrictMode>
+    <Provider store={store}>
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
+    </Provider>
+  </React.StrictMode>,
 );
 
 // Hot reloadable translation json files
