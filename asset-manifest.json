@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/gangadhar-ui/static/css/main.5026f0b6.css",
-    "main.js": "/gangadhar-ui/static/js/main.51d7836e.js",
+    "main.js": "/gangadhar-ui/static/js/main.e40ecf5e.js",
     "static/js/245.3a180b41.chunk.js": "/gangadhar-ui/static/js/245.3a180b41.chunk.js",
     "static/js/122.8bba214e.chunk.js": "/gangadhar-ui/static/js/122.8bba214e.chunk.js",
     "static/js/471.e6e0c4a8.chunk.js": "/gangadhar-ui/static/js/471.e6e0c4a8.chunk.js",
@@ -13,6 +13,6 @@
   },
   "entrypoints": [
     "static/css/main.5026f0b6.css",
-    "static/js/main.51d7836e.js"
+    "static/js/main.e40ecf5e.js"
   ]
 }
