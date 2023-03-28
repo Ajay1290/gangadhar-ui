@@ -13,8 +13,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GlobalStyle } from 'styles/global-styles';
 
 import { HomePage } from './pages/HomePage/Loadable';
-import { NotFoundPage } from './components/NotFoundPage/Loadable';
+import { NotFoundPage } from './pages/NotFoundPage/Loadable';
 import { useTranslation } from 'react-i18next';
+import { DataSourcePage } from './pages/DataSourcePage';
+import { DashboardGridPage } from './pages/DashboardGridPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { NotebookPage } from './pages/NotebookPage';
+import { Wizard } from './pages/Wizard/Loadable';
 
 export function App() {
   const { i18n } = useTranslation();
@@ -30,6 +35,11 @@ export function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/wizards" element={<Wizard />} />
+        <Route path="/dashboards" element={<DashboardGridPage />} />
+        <Route path="/dashboards/:dashboardId" element={<DashboardPage />} />
+        <Route path="/data-source" element={<DataSourcePage />} />
+        <Route path="/notebooks" element={<NotebookPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <GlobalStyle />
