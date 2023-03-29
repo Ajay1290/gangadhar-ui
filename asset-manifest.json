@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/gangadhar-ui/static/css/main.5026f0b6.css",
-    "main.js": "/gangadhar-ui/static/js/main.4edfce8b.js",
+    "main.css": "/gangadhar-ui/static/css/main.3601fcd9.css",
+    "main.js": "/gangadhar-ui/static/js/main.38de79df.js",
     "static/js/245.3a180b41.chunk.js": "/gangadhar-ui/static/js/245.3a180b41.chunk.js",
     "static/js/122.8bba214e.chunk.js": "/gangadhar-ui/static/js/122.8bba214e.chunk.js",
     "static/js/471.e6e0c4a8.chunk.js": "/gangadhar-ui/static/js/471.e6e0c4a8.chunk.js",
-    "static/js/830.45e91ac6.chunk.js": "/gangadhar-ui/static/js/830.45e91ac6.chunk.js",
+    "static/js/830.15a7bc28.chunk.js": "/gangadhar-ui/static/js/830.15a7bc28.chunk.js",
     "static/js/945.5ba3d858.chunk.js": "/gangadhar-ui/static/js/945.5ba3d858.chunk.js",
-    "static/js/345.c14a651e.chunk.js": "/gangadhar-ui/static/js/345.c14a651e.chunk.js",
-    "static/js/257.4d412a24.chunk.js": "/gangadhar-ui/static/js/257.4d412a24.chunk.js",
+    "static/js/345.56d7ab75.chunk.js": "/gangadhar-ui/static/js/345.56d7ab75.chunk.js",
+    "static/js/562.bee8b11c.chunk.js": "/gangadhar-ui/static/js/562.bee8b11c.chunk.js",
     "index.html": "/gangadhar-ui/index.html"
   },
   "entrypoints": [
-    "static/css/main.5026f0b6.css",
-    "static/js/main.4edfce8b.js"
+    "static/css/main.3601fcd9.css",
+    "static/js/main.38de79df.js"
   ]
 }
