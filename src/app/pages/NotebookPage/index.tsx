@@ -8,6 +8,7 @@ import styled from 'styled-components/macro';
 // import { useTranslation } from 'react-i18next';
 // import { messages } from './messages';
 import { PageWrapper } from 'app/components/layouts/PageWrapper';
+import { Link } from 'react-router-dom';
 
 interface Props {}
 
@@ -17,7 +18,7 @@ export function NotebookPage(props: Props) {
   // const { t, i18n } = useTranslation();
 
   const NotebookCard = ({ title, dashboardId }) => (
-    <NotebookCardWrapper href={`/dashboards/${dashboardId}`}>
+    <NotebookCardWrapper to={`/dashboards/${dashboardId}`}>
       <NotebookCardTitle>{title}</NotebookCardTitle>
       <div
         style={{ fontSize: 10 }}
@@ -68,7 +69,7 @@ const NotebookCardTitle = styled.h2`
   font-size: 14px;
 `;
 
-const NotebookCardWrapper = styled.a`
+const NotebookCardWrapper = styled(Link)`
   border: 1px solid #e3e3e3;
   border-radius: 3px;
   padding: 0.5em 1em;

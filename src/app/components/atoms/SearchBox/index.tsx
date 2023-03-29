@@ -30,7 +30,7 @@ export function SearchBox(props: Props) {
 
   return (
     <SearchBoxWrapper>
-      <CgSearch fontSize={14} color={'#58585a'} />
+      <CgSearch fontSize={14} color={'#F00'} />
       <SearchBoxInp
         type="text"
         placeholder="Search"

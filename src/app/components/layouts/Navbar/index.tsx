@@ -4,6 +4,7 @@
  *
  */
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 // import { useTranslation } from 'react-i18next';
 // import { messages } from './messages';
@@ -19,17 +20,17 @@ export function Navbar(props: Props) {
       <div className="flex items-center" style={{ flex: 6 }}>
         <NavTitle>Gangadhar</NavTitle>
         <NavMenu className="ml-4">
-          <NavMenuLink style={{ paddingLeft: 0 }} href="/">
+          <NavMenuLink style={{ paddingLeft: 0 }} to="/">
             Home
           </NavMenuLink>
-          <NavMenuLink href="/dashboards">Dashboards</NavMenuLink>
-          <NavMenuLink href="/wizards">Wizard</NavMenuLink>
-          <NavMenuLink href="/data-source">Data</NavMenuLink>
-          <NavMenuLink href="/notebooks">Notebooks</NavMenuLink>
+          <NavMenuLink to="/dashboards">Dashboards</NavMenuLink>
+          <NavMenuLink to="/wizards">Wizard</NavMenuLink>
+          <NavMenuLink to="/data-source">Data</NavMenuLink>
+          <NavMenuLink to="/notebooks">Notebooks</NavMenuLink>
         </NavMenu>
       </div>
       <div className="flex items-center justify-end" style={{ flex: 1 }}>
-        <NavMenuLink>?</NavMenuLink>
+        <NavMenuLink to={'/'}>?</NavMenuLink>
       </div>
     </Nav>
   );
@@ -53,7 +54,7 @@ const NavMenu = styled.nav`
   padding: 0 1rem;
 `;
 
-const NavMenuLink = styled.a`
+const NavMenuLink = styled(Link)`
   font-family: 'Inter';
   font-style: normal;
   font-weight: 500;

@@ -17,6 +17,8 @@ import { SearchBox } from 'app/components/atoms/SearchBox';
 import generateUUID from 'utils/uuid';
 import { Accordian } from 'app/components/atoms/Accordian/Loadable';
 import { FiDownload, FiEdit3 } from 'react-icons/fi';
+import { SiReacttable } from 'react-icons/si';
+import { TbDragDrop2 } from 'react-icons/tb';
 
 interface Props {}
 
@@ -133,7 +135,12 @@ export function Wizard(props: Props) {
         <div style={{ flex: 2 }} className="w-full border p-2 flex flex-col">
           <div className="pb-2 flex flex-row items-center">
             <SearchBox list={tables} searchKey="name" />
-            <BsTextWrap fontSize={20} className="mx-1" cursor={'pointer'} />
+            <BsTextWrap
+              fontSize={20}
+              className="mx-1"
+              cursor={'pointer'}
+              color="#F00"
+            />
           </div>
           <div className="flex flex-col  h-full overflow-auto ">
             {tables.map((table, j) => (
@@ -180,33 +187,45 @@ export function Wizard(props: Props) {
             onDragOver={e => onDragOver(e)}
             onDrop={e => onDrop(e)}
           >
-            {list.map((l, i) => (
-              <div
-                key={`ld-${i}`}
-                style={{ background: '#58585a', border: '1px solid #58585a' }}
-                className="p-1 text-white border m-1 rounded"
-                onDragOver={e => dragEnter(e, i)}
-                onDragStart={(e: any) => dragStart(e, l, i)}
-                onDragEnd={onDrop}
-                draggable
-              >
-                <span className="flex flex-row justify-between items-center">
-                  <span
-                    className="border-r w-full mr-1"
-                    style={{ fontSize: 10 }}
-                  >
-                    {l.name}
+            {list.length > 0 ? (
+              list.map((l, i) => (
+                <div
+                  key={`ld-${i}`}
+                  style={{
+                    background: '#58585a',
+                    border: '1px solid #58585a',
+                  }}
+                  className="p-1 text-white border m-1 rounded"
+                  onDragOver={e => dragEnter(e, i)}
+                  onDragStart={(e: any) => dragStart(e, l, i)}
+                  onDragEnd={onDrop}
+                  draggable
+                >
+                  <span className="flex flex-row justify-between items-center">
+                    <span
+                      className="border-r w-full mr-1"
+                      style={{ fontSize: 10 }}
+                    >
+                      {l.name}
+                    </span>
+                    <span className=" h-full">
+                      <AiOutlineClose
+                        onClick={() => onCloseClicked(l)}
+                        fontSize={12}
+                        cursor={'pointer'}
+                      />
+                    </span>
                   </span>
-                  <span className=" h-full">
-                    <AiOutlineClose
-                      onClick={() => onCloseClicked(l)}
-                      fontSize={12}
-                      cursor={'pointer'}
-                    />
-                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col border-dashed border border-t-0 h-full items-center justify-center">
+                <TbDragDrop2 fontSize={20} />
+                <span className="text-center mt-2">
+                  Drag and drop columns to measures
                 </span>
               </div>
-            ))}
+            )}
           </div>
         </div>
         <div
@@ -216,7 +235,7 @@ export function Wizard(props: Props) {
           <div className="flex flex-row justify-between p-2 mb-2 border-b">
             <span className="flex flex-row items-center">
               <span className="mr-2">Sample Analyzer Insight Title</span>
-              <FiEdit3 fontSize={14} cursor={'pointer'} />
+              <FiEdit3 fontSize={14} cursor={'pointer'} color="#F00" />
             </span>
             <span>
               <DownloadBtn iconSize={16} />
@@ -226,8 +245,10 @@ export function Wizard(props: Props) {
             {list.length > 0 ? (
               <DataGrid data={dataSourceData} />
             ) : (
-              <p className="flex flex-row items-center justify-center h-full w-full">
-                Drag and Drop Columns to Measures
+              <p className="flex flex-col items-center text-sm justify-center h-full w-full">
+                <SiReacttable fontSize={40} className="mb-4" />
+                Drag and drop columns to measures to start seeing data here in
+                table format
               </p>
             )}
           </div>

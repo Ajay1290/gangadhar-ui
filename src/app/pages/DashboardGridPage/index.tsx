@@ -8,6 +8,7 @@ import styled from 'styled-components/macro';
 // import { useTranslation } from 'react-i18next';
 // import { messages } from './messages';
 import { PageWrapper } from 'app/components/layouts/PageWrapper';
+import { Link } from 'react-router-dom';
 
 interface Props {}
 
@@ -17,7 +18,7 @@ export function DashboardGridPage(props: Props) {
   // const { t, i18n } = useTranslation();
 
   const DashboardCard = ({ title, dashboardId }) => (
-    <DashboardCardWrapper href={`/dashboards/${dashboardId}`}>
+    <DashboardCardWrapper to={`/dashboards/${dashboardId}`}>
       <DashboardCardTitle>{title}</DashboardCardTitle>
       <div
         style={{ fontSize: 10 }}
@@ -68,7 +69,7 @@ const DashboardCardTitle = styled.h2`
   font-size: 14px;
 `;
 
-const DashboardCardWrapper = styled.a`
+const DashboardCardWrapper = styled(Link)`
   border: 1px solid #e3e3e3;
   border-radius: 3px;
   padding: 0.5em 1em;

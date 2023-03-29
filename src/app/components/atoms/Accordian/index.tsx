@@ -19,7 +19,7 @@ export function Accordian(props: Props) {
   return (
     <AccordianWrapper className={props.className}>
       <div
-        className="flex flex-row items-center cursor-pointer"
+        className="flex flex-row items-center cursor-pointer border-b p-1"
         onClick={() => setShow(!show)}
       >
         <span>

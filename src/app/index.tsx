@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, HashRouter } from 'react-router-dom';
 
 import { GlobalStyle } from 'styles/global-styles';
 
@@ -24,7 +24,7 @@ import { Wizard } from './pages/Wizard/Loadable';
 export function App() {
   const { i18n } = useTranslation();
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/gangadhar-ui">
       <Helmet
         titleTemplate="%s - React Boilerplate"
         defaultTitle="React Boilerplate"
@@ -32,7 +32,6 @@ export function App() {
       >
         <meta name="description" content="A React Boilerplate application" />
       </Helmet>
-
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/wizards" element={<Wizard />} />
