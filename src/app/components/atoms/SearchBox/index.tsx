@@ -45,7 +45,7 @@ const SearchBoxWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  border: 1px solid #58585a88;
+  border: 1px solid ${props => props.theme.primary}88;
   padding: 2px;
   border-radius: 2px;
   width: 100%;

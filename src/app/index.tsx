@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { BrowserRouter, Routes, Route, HashRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { GlobalStyle } from 'styles/global-styles';
 
@@ -20,8 +20,9 @@ import { DashboardGridPage } from './pages/DashboardGridPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { NotebookPage } from './pages/NotebookPage';
 import { Wizard } from './pages/Wizard/Loadable';
+import { NotebookGridPage } from './pages/NotebookGridPage';
 
-export function App() {
+export function App({ theme }: { theme?: any }) {
   const { i18n } = useTranslation();
   return (
     <BrowserRouter basename="/gangadhar-ui">
@@ -35,13 +36,15 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/wizards" element={<Wizard />} />
+        <Route path="/insight/:insightId" element={<Wizard />} />
         <Route path="/dashboards" element={<DashboardGridPage />} />
         <Route path="/dashboards/:dashboardId" element={<DashboardPage />} />
         <Route path="/data-source" element={<DataSourcePage />} />
-        <Route path="/notebooks" element={<NotebookPage />} />
+        <Route path="/notebooks" element={<NotebookGridPage />} />
+        <Route path="/notebooks/:notebookId" element={<NotebookPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <GlobalStyle />
+      <GlobalStyle theme={theme} />
     </BrowserRouter>
   );
 }

@@ -4,7 +4,7 @@
  *
  */
 import * as React from 'react';
-import styled from 'styled-components/macro';
+import styled, { useTheme } from 'styled-components/macro';
 // import { useTranslation } from 'react-i18next';
 // import { messages } from './messages';
 import DataFrame from 'utils/DataFrame';
@@ -18,6 +18,8 @@ interface Props {
 }
 
 export function LineChart(props: Props) {
+  const theme = useTheme() as any;
+
   const visualizationId = generateUUID();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // const { t, i18n } = useTranslation();
@@ -121,7 +123,7 @@ export function LineChart(props: Props) {
       .append('path')
       .datum(data)
       .attr('fill', 'none')
-      .attr('stroke', '#58585A')
+      .attr('stroke', theme.primary)
       .attr('stroke-width', 1.5)
       .attr(
         'd',

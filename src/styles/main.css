@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Set the deafult values */
+  --selected-primary-color: var(--light-primary-color);
+  --selected-secondary-color: var(--light-primary-color);
+  --selected-disabled-color: var(--light-disabled-color);
+  
+  /* Set the 'light' theme */
+  --light-primary-color: #58585a;
+  --light-secondary-color: #f1f1f1;
+  --light-disabled-color: #58585acc;
+
+  /* Set the 'dark' theme */
+  --dark-primary-color: #f1f1f1;
+  --dark-secondary-color: #58585a;
+  --dark-disabled-color: #f1f1f1cc;  
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 5px;
@@ -39,52 +56,7 @@ body::-webkit-scrollbar-thumb {
   height: 100%;
 }
 
-.tooltip {
-  position: absolute;
 
-  display: block;
-  visibility: hidden;
-  box-sizing: border-box;
-  z-index: 2200;
-  max-width: 250px;
-  width: max-content;
-
-  /* background-color: white; */
-
-  border: 1px solid #58585a33;
-  border-radius: 2px;
-
-  padding: 5px 10px;
-
-  font-family: 'Inter';
-  font-size: 10px;
-  line-height: 12px;
-  color: #fff;
-
-  background: rgba(88, 88, 90, 0.8);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-
-  border: 1px solid rgba(88, 88, 90, 1);
-
-  transition: 500ms;
-  transition-delay: 100ms;
-  transition-timing-function: linear;
-}
-
-.tooltip::before {
-  content: '';
-  background-color: #fff;
-
-  height: 2px;
-  width: 100%;
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  border-radius: 5px;
-}
 
 @keyframes spinner {
   0% {

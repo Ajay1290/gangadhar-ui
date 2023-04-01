@@ -44,7 +44,7 @@ const NavTitle = styled.h1`
   line-height: 19px;
   letter-spacing: 0.5px;
 
-  color: #ffffff;
+  color: ${props => props.theme.secondary};
 `;
 
 const NavMenu = styled.nav`
@@ -60,19 +60,19 @@ const NavMenuLink = styled(Link)`
   font-weight: 500;
   font-size: 14px;
   line-height: 17px;
-  color: #ffffff;
+  color: ${props => props.theme.secondary};
   padding: 0 0.5rem;
   letter-spacing: 0.25px;
 `;
 
 const Nav = styled.nav`
-  color: #ffffff;
+  color: ${props => props.theme.secondary};
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem 1rem;
-  background-color: #58585a;
+  background-color: ${props => props.theme.primary};
   position: sticky;
   top: 0;
   z-index: 9999;

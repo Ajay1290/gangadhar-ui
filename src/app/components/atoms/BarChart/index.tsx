@@ -4,7 +4,7 @@
  *
  */
 import * as React from 'react';
-import styled from 'styled-components/macro';
+import styled, { useTheme } from 'styled-components/macro';
 import * as d3 from 'd3';
 import DataFrame from 'utils/DataFrame';
 import generateUUID from 'utils/uuid';
@@ -16,6 +16,7 @@ interface Props {
 }
 
 export function BarChart(props: Props) {
+  const theme = useTheme() as any;
   const visualizationId = generateUUID();
   const SVGHeight = props.height;
   const SVGWidth = props.width;
@@ -65,7 +66,7 @@ export function BarChart(props: Props) {
       .attr('y', (d: any) => y(d.y))
       .attr('width', x.bandwidth())
       .attr('height', (d: any) => y(0) - y(d.y))
-      .attr('fill', '#58585A');
+      .attr('fill', theme.primary);
   }, []);
 
   return (

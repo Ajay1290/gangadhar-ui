@@ -13,6 +13,7 @@ import { BarChart } from 'app/components/atoms/BarChart';
 import { LineChart } from 'app/components/atoms/LineChart';
 import { Model } from 'app/components/atoms/Model/Loadable';
 import { Loader } from 'app/components/atoms/Loader';
+import { useNavigate } from 'react-router-dom';
 
 enum insightTypeEnum {
   Table = 'table',
@@ -24,13 +25,15 @@ enum insightTypeEnum {
 interface Props {
   title: string;
   insightType: string;
-  data: any;
+  data?: any;
+  id?: string;
+  dataApi?: Promise<any>;
 }
 
 export function Insight(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // const { t, i18n } = useTranslation();
-
+  const navigate = useNavigate();
   const [isMaximized, setisMaximized] = React.useState(false);
   const insightWrapperRef = React.useRef({} as any);
   const insightModelWrapperRef = React.useRef({} as any);
@@ -40,6 +43,8 @@ export function Insight(props: Props) {
 
   const [widthModel, setWidthModel] = React.useState(100);
   const [heightModel, setHeightModel] = React.useState(100);
+
+  const [data, setData] = React.useState([] as any);
 
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -76,7 +81,7 @@ export function Insight(props: Props) {
 
         setTimeout(() => {
           setIsLoading(false);
-        }, 2000);
+        }, 400);
       });
       if (resizeObserver) {
         resizeObserver.observe(insightWrapperRef.current);
@@ -84,16 +89,33 @@ export function Insight(props: Props) {
       }
     }
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    if (props.dataApi) {
+      props.dataApi
+        ?.then(r => {
+          setData(r);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 400);
+        })
+        .catch(e => {
+          console.log(e);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 400);
+        });
+    } else {
+      setData(props.data);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 400);
+    }
   }, []);
 
   const DownloadBtn = ({ iconSize = 14 }) => {
     let url = '#';
     let fileName = '';
     if (props.insightType === (insightTypeEnum.Bar || insightTypeEnum.Line)) {
-      const str = JSON.stringify(props.data);
+      const str = JSON.stringify(data);
       const bytes = new TextEncoder().encode(str);
       const blob = new Blob([bytes], {
         type: 'application/json;charset=utf-8',
@@ -102,7 +124,7 @@ export function Insight(props: Props) {
       fileName = `${props.title}.json`;
     }
     if (props.insightType === insightTypeEnum.Table) {
-      const str = JSON.stringify(props.data.rows);
+      const str = JSON.stringify(data.rows);
       const bytes = new TextEncoder().encode(str);
       const blob = new Blob([bytes], {
         type: 'application/json;charset=utf-8',
@@ -111,7 +133,7 @@ export function Insight(props: Props) {
       fileName = `${props.title}.json`;
     }
     if (props.insightType === insightTypeEnum.Text) {
-      const str = JSON.stringify(props.data.text);
+      const str = JSON.stringify(data.text);
       const bytes = new TextEncoder().encode(str);
       const blob = new Blob([bytes], {
         type: 'application/text;charset=utf-8',
@@ -128,13 +150,13 @@ export function Insight(props: Props) {
 
   const RenderInisght = ({ height, width }) => {
     if (props.insightType === insightTypeEnum.Bar) {
-      return <BarChart height={height} width={width} data={props.data} />;
+      return <BarChart height={height} width={width} data={data} />;
     } else if (props.insightType === insightTypeEnum.Line) {
-      return <LineChart height={height} width={width} data={props.data} />;
+      return <LineChart height={height} width={width} data={data} />;
     } else if (props.insightType === insightTypeEnum.Table) {
-      return <DataGrid data={props.data} />;
+      return <DataGrid flat data={data} />;
     } else if (props.insightType === insightTypeEnum.Text) {
-      return <p>{props.data.text}</p>;
+      return <p>{data.text}</p>;
     } else {
       return <p>NO RENDER</p>;
     }
@@ -142,6 +164,12 @@ export function Insight(props: Props) {
 
   const onModelClosed = () => {
     setisMaximized(false);
+  };
+
+  const onEditClicked = () => {
+    if (props.id) {
+      navigate(`/insight/${props.id}`);
+    }
   };
 
   return (
@@ -162,7 +190,7 @@ export function Insight(props: Props) {
             />
           </span>
           <span className="px-1">
-            <FiEdit3 size={14} />
+            <FiEdit3 cursor={'pointer'} onClick={onEditClicked} size={14} />
           </span>
         </div>
       </div>

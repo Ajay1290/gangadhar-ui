@@ -4,25 +4,33 @@
  *
  */
 import * as React from 'react';
-import styled from 'styled-components/macro';
+import styled, { useTheme } from 'styled-components/macro';
+import { Button } from '../Button';
 import { Loader } from '../Loader/Loadable';
 
 interface Props {
-  data: {
-    columns: string[];
-    rows: any;
-  };
+  flat?: boolean;
+  compact?: boolean;
+  data: any;
 }
 
 export function DataGrid(props: Props) {
+  const theme = useTheme() as any;
+
   const [data, setData] = React.useState({
-    columns: [] as string[],
+    columns: [] as any[],
     rows: [] as any,
   });
+
+  const compactStyle = props.compact
+    ? { fontSize: 10, padding: '0.12em 0.5em' }
+    : {};
 
   const [isLoading, setIsLoading] = React.useState(true);
   const [currPage, setCurrPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(5);
+
+  const [rowCount, setRowCount] = React.useState(0);
 
   React.useEffect(() => {
     processRowsToDisplay(currPage);
@@ -30,18 +38,35 @@ export function DataGrid(props: Props) {
 
   const processRowsToDisplay = page => {
     setIsLoading(true);
-    setData({
-      columns: props.data.columns,
-      rows: props.data.rows.slice((page - 1) * pageSize, page * pageSize),
-    });
+    try {
+      if (props.flat) {
+        const d = {};
+        props.data.columns.forEach(col => {
+          d[col.title] = props.data.rows[col.title].slice(
+            (page - 1) * pageSize,
+            page * pageSize,
+          );
+        });
+        setData({
+          columns: props.data.columns,
+          rows: d,
+        });
+        setRowCount(props.data.rows[props.data.columns[0].title].length);
+      } else {
+        setData({
+          columns: props.data.columns,
+          rows: props.data.rows.slice((page - 1) * pageSize, page * pageSize),
+        });
+        setRowCount(props.data.rows.length);
+      }
+    } catch (error) {}
     setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 200);
   };
 
   const onPrevPageBtnClicked = page => {
     if (page >= 1) {
-      setIsLoading(true);
       setCurrPage(page - 1);
       processRowsToDisplay(page - 1);
     }
@@ -52,8 +77,7 @@ export function DataGrid(props: Props) {
    * @param page Current Page Number
    */
   const onNextPageBtnClicked = page => {
-    if (page <= Math.ceil(props.data.rows.length / pageSize)) {
-      setIsLoading(true);
+    if (page <= Math.ceil(rowCount / pageSize)) {
       setCurrPage(page + 1);
       processRowsToDisplay(page + 1);
     }
@@ -61,7 +85,11 @@ export function DataGrid(props: Props) {
 
   const activeIfPageSize = page =>
     pageSize === page
-      ? { background: '#58585a', color: '#FFF', borderRadius: '50%' }
+      ? {
+          background: theme.primary,
+          color: theme.secondary,
+          borderRadius: '50%',
+        }
       : {};
 
   return (
@@ -76,35 +104,109 @@ export function DataGrid(props: Props) {
             <thead className="sticky top-0 ">
               <tr>
                 <TableHeadCell
-                  style={{ width: 55, textAlign: 'right' }}
+                  style={{ width: 55, textAlign: 'right', ...compactStyle }}
                   key={`header-cell-i`}
                 >
                   #
                 </TableHeadCell>
-                {data.columns.map((col, i) => (
-                  <TableHeadCell key={`header-cell-${i}`}>{col}</TableHeadCell>
-                ))}
+                <>
+                  {data.columns.map((col, i) => (
+                    <TableHeadCell
+                      key={`header-cell-${i}`}
+                      style={{
+                        ...compactStyle,
+                        textAlign: col.datatype
+                          ? col.datatype === 'string'
+                            ? 'left'
+                            : 'right'
+                          : 'left',
+                      }}
+                    >
+                      {col.title ? col.title : col}
+                    </TableHeadCell>
+                  ))}
+                </>
               </tr>
             </thead>
             <tbody className="overflow-auto">
-              {data.rows.map((row, i) => (
-                <TableRow key={`row-${i}`}>
-                  <TableCell
-                    style={{ width: 55, textAlign: 'right' }}
-                    key={`cell-i-(${i + 1})`}
-                  >
-                    {i + 1 + pageSize * (currPage - 1)}
-                  </TableCell>
-                  {data.columns.map((col, j) => (
-                    <TableCell key={`cell-(${i},${j})`}>{row[col]}</TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {props.flat ? (
+                Object.keys(data.rows)[0] ? (
+                  new Array(data.rows[Object.keys(data.rows)[0]].length)
+                    .fill(0)
+                    .map((r, i) => (
+                      <TableRow key={`row-${i}`}>
+                        <TableCell
+                          style={{
+                            width: 55,
+                            textAlign: 'right',
+                            ...compactStyle,
+                          }}
+                          key={`cell-i-(${i + 1})`}
+                        >
+                          {i + 1 + pageSize * (currPage - 1)}
+                        </TableCell>
+                        {data.columns.map((col, j) => (
+                          <TableCell
+                            key={`cell-(${i},${j})`}
+                            style={{
+                              textAlign:
+                                col.datatype === 'string' ? 'left' : 'right',
+                              ...compactStyle,
+                            }}
+                          >
+                            {data.rows[col.title][i]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan={data.columns.length + 1}>
+                      <div className="h-full w-full flex flex-row items-center justify-center p-5">
+                        No Rows to Display
+                      </div>
+                    </td>
+                  </tr>
+                )
+              ) : data.rows.length > 0 ? (
+                data.rows.map((row, i) => (
+                  <TableRow key={`row-${i}`}>
+                    <TableCell
+                      style={{ width: 55, textAlign: 'right' }}
+                      key={`cell-i-(${i + 1})`}
+                    >
+                      {i + 1 + pageSize * (currPage - 1)}
+                    </TableCell>
+                    {data.columns.map((col, j) => (
+                      <TableCell
+                        key={`cell-(${i},${j})`}
+                        style={{
+                          textAlign: Number.isNaN(
+                            Number(row[col.title ? col.title : col]),
+                          )
+                            ? 'left'
+                            : 'right',
+                        }}
+                      >
+                        {row[col.title ? col.title : col]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={data.columns.length + 1}>
+                    <div className="h-full w-full flex flex-row items-center justify-center p-5">
+                      No Rows to Display
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </TableWrapper>
       )}
-      <div className="flex flex-row justify-between items-center p-2 border-t">
+      <div className="flex flex-row justify-between items-center p-4 border-t">
         <div>
           <PageSizeBtn
             style={activeIfPageSize(5)}
@@ -132,21 +234,27 @@ export function DataGrid(props: Props) {
           </PageSizeBtn>
         </div>
         <div>
-          {currPage} of {Math.ceil(props.data.rows.length / pageSize)}
+          {Math.ceil(rowCount / pageSize) > 0 && (
+            <>
+              {currPage} of {Math.ceil(rowCount / pageSize)} Pages
+            </>
+          )}
         </div>
         <div>
           <TableFooterBTN
+            sm
+            title="Previous"
+            variant="outline"
+            className="mx-2"
             disabled={currPage <= 1}
             onClick={() => onPrevPageBtnClicked(currPage)}
-          >
-            Previous
-          </TableFooterBTN>
+          ></TableFooterBTN>
           <TableFooterBTN
-            disabled={currPage >= Math.ceil(props.data.rows.length / pageSize)}
+            sm
+            title="Next"
+            disabled={currPage >= Math.ceil(rowCount / pageSize)}
             onClick={() => onNextPageBtnClicked(currPage)}
-          >
-            Next
-          </TableFooterBTN>
+          ></TableFooterBTN>
         </div>
       </div>
     </div>
@@ -158,7 +266,7 @@ const TableRow = styled.tr`
     background-color: #58585a11;
   }
   :nth-child(even) {
-    background-color: #fff;
+    background-color: ${props => props.theme.secondary};
   }
 
   :hover {
@@ -187,14 +295,13 @@ const TableHeadCell = styled.th`
   padding: 0.25em 1em;
   border-bottom: 1px solid #fff;
   border-right: 1px solid #fff;
-  background-color: #58585a;
-  color: #fff;
+  background-color: ${props => props.theme.primary};
+  color: ${props => props.theme.secondary};
   text-align: left;
 `;
 
-const TableFooterBTN = styled.button`
-  border: 1px solid #e3e3e3;
+const TableFooterBTN = styled(Button)`
+  /* border: 1px solid #e3e3e3; */
   padding: 0.5em 1em;
   border-radius: 2px;
-  margin: 0 5px;
 `;

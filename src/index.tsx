@@ -26,17 +26,36 @@ import reportWebVitals from 'reportWebVitals';
 
 // Initialize languages
 import './locales/i18n';
+import { ThemeProvider } from 'styled-components';
 
 const store = configureAppStore();
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
 );
 
+const lightTheme = {
+  primary: '#58585a',
+  secondary: '#fff',
+  disabled: '#58585acc',
+};
+
+const darkTheme = {
+  primary: '#f1f1f1',
+  secondary: '#58585a',
+  disabled: '#f1f1f1cc',
+};
+
+const theme = {
+  ...lightTheme,
+};
+
 root.render(
   // <React.StrictMode>
   <Provider store={store}>
     <HelmetProvider>
-      <App />
+      <ThemeProvider theme={theme}>
+        <App theme={theme} />
+      </ThemeProvider>
     </HelmetProvider>
   </Provider>,
   // </React.StrictMode>,
