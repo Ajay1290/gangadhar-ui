@@ -58,17 +58,31 @@ export function NotebookPage(props: Props) {
                 <span className=" text-green-500">{paragraph.status}</span>
               </div>
             </div>
-            <p className="py-1">{paragraph.text}</p>
+            <textarea
+              className="py-1 w-full outline-none"
+              style={{
+                resize: 'vertical',
+                maxHeight: '150px',
+                whiteSpace: 'pre-line',
+              }}
+              rows={5}
+              value={paragraph.text}
+              onChange={e => {}}
+            ></textarea>
+            {/* <input type={'text'} className="py-1" value={} /> */}
           </div>
           {paragraph.results && (
             <div className="w-full relative bg-slate-100 shadow-inner  p-2">
               <div className="text-green-500">{paragraph.results.code}</div>
-              <div>
+              <div style={{ maxHeight: 200, overflow: 'auto' }}>
                 {paragraph.results.msg.map((m, i) => (
                   <div key={`msg-${i}`}>
-                    {m.type === 'TEXT' && <p>{m.data}</p>}
+                    {m.type === 'TEXT' && (
+                      <p style={{ whiteSpace: 'pre-line' }}>{m.data}</p>
+                    )}
                     {m.type === 'HTML' && (
                       <div
+                        style={{ whiteSpace: 'pre-line' }}
                         dangerouslySetInnerHTML={{
                           __html: marked.parse(m.data),
                         }}

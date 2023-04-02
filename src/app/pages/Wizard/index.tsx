@@ -48,10 +48,12 @@ export function Wizard(props: Props) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [tables, setTables] = React.useState([] as any);
   const [list, setList] = React.useState([] as any);
+  const [groupingList, setGroupingList] = React.useState([] as any);
   const [rawDataSourceData, setRawDataSourceData] = React.useState({} as any);
   const [selectedTable, setSelectedTable] = React.useState({} as any);
   const [dataSourceData, setDataSourceData] = React.useState({} as any);
   const [insightData, setInsightData] = React.useState({} as any);
+  const [selectedAggType, setSelectedAggType] = React.useState({ type: 'sum' });
   const [selectedInsightType, setSelectedInsightType] = React.useState({
     type: 'table',
   });
@@ -118,29 +120,25 @@ export function Wizard(props: Props) {
       });
   };
 
-  const bringTableData = async table_id => {
-    const res = await axios.get(`http://localhost:5000/tables/${table_id}`);
-    const columns = Object.keys(res.data);
-    const data = {};
-    columns.forEach(c => {
-      data[c] = Object.values(res.data[c]);
-    });
-    setRawDataSourceData(data as any);
-    const cols = list.map(c => c.title) as any;
-    const subset = Object.keys(rawDataSourceData)
-      .filter(key => cols.indexOf(key) >= 0)
-      .reduce(
-        (obj2, key) => ((obj2[key] = rawDataSourceData[key]), obj2),
-        {},
-      ) as any;
+  const bringTableData = async (
+    table_id,
+    groupList = groupingList,
+    aggType = selectedAggType,
+  ) => {
+    const res = await axios.get(
+      `http://localhost:5000/tables/${table_id}/query?groupBy=${groupList.map(
+        d => d.title,
+      )}&aggType=${aggType.type}`,
+    );
+    const columns = res.data.schema.fields;
+    setRawDataSourceData(res.data.data as any);
     setDataSourceData({
       columns: list,
-      rows: subset,
+      rows: res.data.data,
     });
-    console.log(dataSourceData);
   };
 
-  const onDrop = e => {
+  const onDrop = async (e, type, isInternal = true) => {
     e.preventDefault();
     e.stopPropagation();
     let colData = {};
@@ -149,33 +147,31 @@ export function Wizard(props: Props) {
       colData = JSON.parse(l || '');
     } catch (error) {}
     if (Object.keys(colData).length > 0) {
-      const copyListItems = [...list];
-      copyListItems.splice(dragItem.current, 1);
-      copyListItems.splice(dragOverItem.current, 0, colData);
+      const copyListItems = type === 'grouping' ? [...groupingList] : [...list];
+      if (isInternal) {
+        copyListItems.splice(dragItem.current, 1);
+        copyListItems.splice(dragOverItem.current, 0, colData);
+      } else {
+        copyListItems.push(colData);
+      }
       dragItem.current = null;
       dragOverItem.current = null;
-      setList(copyListItems);
-      const cols = copyListItems.map(c => c.title) as any;
-      const subset = Object.keys(rawDataSourceData)
-        .filter(key => cols.indexOf(key) >= 0)
-        .reduce(
-          (obj2, key) => ((obj2[key] = rawDataSourceData[key]), obj2),
-          {},
-        ) as any;
-      setDataSourceData({
-        columns: copyListItems,
-        rows: subset,
-      });
+      console.log('type: ', type);
+      if (type === 'grouping') {
+        setGroupingList(copyListItems);
+        await bringTableData(selectedTable.id, copyListItems);
+      } else {
+        setList(copyListItems);
+        setDataSourceData({
+          columns: copyListItems,
+          rows: rawDataSourceData,
+        });
+      }
     }
   };
 
   const onDragOver = e => {
     e.preventDefault();
-  };
-
-  const onCloseClicked = async item => {
-    setList(list.filter(l => l.id !== item.id));
-    await bringTableData(selectedTable.id);
   };
 
   const wrapAllTable = () => {
@@ -202,20 +198,6 @@ export function Wizard(props: Props) {
 
   const openSaveModel = () => {
     setShowSaveModel(true);
-  };
-
-  const onTableSelect = (isChecked, table) => {
-    setList([]);
-    if (isChecked) {
-      setSelectedTable(table);
-      if (table.id) {
-        bringTableData(table.id);
-      }
-    }
-  };
-
-  const onClearAll = () => {
-    setList([]);
   };
 
   const SaveInsightModel = () => {
@@ -256,10 +238,19 @@ export function Wizard(props: Props) {
         'measures',
         list.map(l => l.id),
       );
+      formData.append(
+        'groupBy',
+        groupingList.map(l => l.id),
+      );
       formData.append('dashboard_id', selectedDashboard.id);
+      formData.append('insightType', selectedInsightType.type);
+      formData.append('aggType', selectedAggType.type);
+
       axios
         .post(
-          `http://localhost:5000/insight/update/${insightData.id}`,
+          `http://localhost:5000/insight/${
+            insightId ? `update/${insightData.id}` : `create`
+          }`,
           formData,
           {
             headers: {
@@ -295,7 +286,7 @@ export function Wizard(props: Props) {
                       onChange={e => {
                         setInsightName(e.target.value);
                       }}
-                      value={insightName}
+                      valuePass={insightName}
                       placeholder="Table Name"
                     />
                   </div>
@@ -357,7 +348,7 @@ export function Wizard(props: Props) {
   const RenderInsight = () => {
     const Renderer = () => {
       if (selectedInsightType.type === 'table') {
-        return <DataGrid compact flat data={dataSourceData} />;
+        return <DataGrid compact data={dataSourceData} />;
       } else if (selectedInsightType.type === 'line') {
         return <LineChart data={dataSourceData} height={300} width={400} />;
       } else if (selectedInsightType.type === 'bar') {
@@ -373,8 +364,7 @@ export function Wizard(props: Props) {
     ) : (
       <p className="flex flex-col items-center text-sm justify-center h-full w-full">
         <SiReacttable fontSize={40} className="mb-4" />
-        Drag and drop columns to measures to start seeing data here in table
-        format
+        Drag and drop columns to measures to start seeing data here.
       </p>
     );
   };
@@ -382,6 +372,12 @@ export function Wizard(props: Props) {
   const onInsightTypeChanged = type => {
     setSelectedInsightType({ type });
     setList([]);
+    setGroupingList([]);
+  };
+
+  const onAggTypeChanged = async type => {
+    setSelectedAggType({ type });
+    await bringTableData(selectedTable.id, groupingList, { type });
   };
 
   const InsightTypeButton = ({ type }) => (
@@ -400,6 +396,188 @@ export function Wizard(props: Props) {
     </span>
   );
 
+  const AggTypeButton = ({ type }) => (
+    <span
+      onClick={e => onAggTypeChanged(type.toLowerCase())}
+      style={{
+        maxWidth: 70,
+        fontSize: 10,
+        backgroundColor:
+          selectedAggType.type === type.toLowerCase() ? '#58585a' : '#FFF',
+        color: selectedAggType.type === type.toLowerCase() ? '#FFF' : '#58585a',
+      }}
+      className={`cursor-pointer border rounded p-1 text-xs w-full text-center mx-1`}
+    >
+      {type}
+    </span>
+  );
+
+  const onTableSelect = async (isChecked, table) => {
+    setList([]);
+    if (isChecked) {
+      setSelectedTable(table);
+      if (table.id) {
+        await bringTableData(table.id);
+      }
+    }
+  };
+
+  const InsightSidebar = () => {
+    const MeasuresWindow = ({ type }) => {
+      const onCloseClicked = (item, i, type) => {
+        console.log('type: ', type);
+        if (type === 'grouping') {
+          setGroupingList(groupingList.filter((l, j) => j !== i));
+          bringTableData(
+            selectedTable.id,
+            groupingList.filter((l, j) => j !== i),
+          ).then(r => {
+            console.log(r);
+          });
+        } else {
+          console.log(
+            'Ds: ',
+            list.filter((l, j) => j !== i),
+          );
+          setList(list.filter((l, j) => j !== i));
+          setDataSourceData({
+            columns: list.filter((l, j) => j !== i),
+            rows: rawDataSourceData,
+          });
+        }
+        // await bringTableData(selectedTable.id);
+      };
+
+      const onClearAll = type => {
+        if (type === 'grouping') {
+          setGroupingList([]);
+          bringTableData(selectedTable.id, []).then(r => {
+            console.log(r);
+          });
+        } else {
+          setList([]);
+        }
+        setDataSourceData({
+          columns: [],
+          rows: rawDataSourceData,
+        });
+      };
+
+      const Measures = ({ data, type }) => {
+        return data.length > 0 ? (
+          data.map((l, i) => (
+            <div
+              key={`ld-${i}`}
+              style={{
+                background: theme.primary,
+                border: `1px solid ${theme.primary}`,
+              }}
+              className="p-1 text-white border m-1 rounded cursor-move"
+              onDragOver={e => dragEnter(e, i)}
+              onDragStart={(e: any) => dragStart(e, l, i)}
+              onDragEnd={e => onDrop(e, type, false)}
+              draggable
+            >
+              <span className="flex flex-row justify-between items-center">
+                <span
+                  className="border-r flex flex-row items-center w-full mr-1"
+                  style={{ fontSize: 10 }}
+                >
+                  <MdOutlineDragIndicator fontSize={14} />
+                  <span
+                    className="ml-1"
+                    style={{
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      maxWidth: '100px',
+                    }}
+                  >
+                    {l.name}
+                  </span>
+                </span>
+                <span className=" h-full">
+                  <AiOutlineClose
+                    onClick={() => onCloseClicked(l, i, type)}
+                    fontSize={12}
+                    cursor={'pointer'}
+                  />
+                </span>
+              </span>
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col border-dashed border border-t-0 h-full items-center justify-center">
+            <TbDragDrop2 fontSize={20} />
+            <span className="text-center mt-2">
+              Drag and drop columns to measures
+            </span>
+          </div>
+        );
+      };
+
+      return (
+        <>
+          <h6 className="border-b p-1 flex flex-row justify-between items-center">
+            {type === 'grouping' ? (
+              <span>
+                Group By{' '}
+                <span style={{ fontSize: 10 }}>({groupingList.length})</span>
+              </span>
+            ) : (
+              <span>
+                Measure <span style={{ fontSize: 10 }}>({list.length})</span>
+              </span>
+            )}
+            <span
+              className="cursor-pointer"
+              onClick={() => onClearAll(type)}
+              style={{ fontSize: 10 }}
+            >
+              Clear All
+            </span>
+          </h6>
+          <div
+            className="w-full h-full flex flex-col overflow-auto"
+            onDragOver={e => onDragOver(e)}
+            onDrop={e => onDrop(e, type)}
+          >
+            <Measures
+              type={type}
+              data={type === 'grouping' ? groupingList : list}
+            />
+          </div>
+        </>
+      );
+    };
+
+    return (
+      <div
+        style={{ flex: 2 }}
+        className="w-full border-r flex flex-col h-full border border-l-0 p-1"
+      >
+        <h6 className="p-1 flex flex-row items-center">
+          <MdOutlineInsights fontSize={16} />
+          <span className="ml-1">Insight</span>
+        </h6>
+        <div className="w-full flex flex-row flex-wrap justify-between items-center my-1">
+          <InsightTypeButton type={'Table'} />
+          <InsightTypeButton type={'KPIs'} />
+          <InsightTypeButton type={'Bar'} />
+          <InsightTypeButton type={'Line'} />
+        </div>
+        <div className="flex flex-row border-t border-b py-1">
+          <AggTypeButton type="Sum" />
+          <AggTypeButton type="Count" />
+          <AggTypeButton type="Mean" />
+        </div>
+        <MeasuresWindow type="grouping" />
+        <MeasuresWindow type="measures" />
+        {/* <MeasuresWindow type="filters" /> */}
+      </div>
+    );
+  };
+
   return (
     <PageWrapper
       title="Wizard Page"
@@ -414,7 +592,7 @@ export function Wizard(props: Props) {
             </span>
           </h6>
           <div className="py-2 flex flex-row items-center">
-            <SearchBox list={tables} searchKey="name" />
+            <SearchBox list={[]} searchKey="name" />
             <BsTextWrap
               fontSize={20}
               className="mx-1"
@@ -443,9 +621,7 @@ export function Wizard(props: Props) {
                         className="p-1 m-1 text-xs border rounded cursor-move"
                         key={`col-${i}`}
                         draggable
-                        onDragOver={e => onDragOver(e)}
                         onDragStart={(e: any) => dragStart(e, col, i)}
-                        onDragEnd={onDrop}
                       >
                         <span className="flex flex-row justify-between items-center">
                           <span
@@ -477,89 +653,7 @@ export function Wizard(props: Props) {
             )}
           </div>
         </div>
-        <div
-          style={{ flex: 2 }}
-          className="w-full border-r flex flex-col h-full border border-l-0 p-1"
-        >
-          <h6 className="p-1 flex flex-row items-center">
-            <MdOutlineInsights fontSize={16} />
-            <span className="ml-1">Insight</span>
-          </h6>
-          <div className="w-full flex flex-row flex-wrap justify-between items-center my-1">
-            <InsightTypeButton type={'Table'} />
-            <InsightTypeButton type={'KPIs'} />
-            <InsightTypeButton type={'Bar'} />
-            <InsightTypeButton type={'Line'} />
-          </div>
-          <h6 className="border-b p-1 flex flex-row justify-between items-center">
-            <span>
-              Measure <span style={{ fontSize: 10 }}>({list.length})</span>
-            </span>
-            <span
-              className="cursor-pointer"
-              onClick={onClearAll}
-              style={{ fontSize: 10 }}
-            >
-              Clear All
-            </span>
-          </h6>
-          <div
-            className="w-full h-full flex flex-col"
-            onDragOver={e => onDragOver(e)}
-            onDrop={e => onDrop(e)}
-          >
-            {list.length > 0 ? (
-              list.map((l, i) => (
-                <div
-                  key={`ld-${i}`}
-                  style={{
-                    background: theme.primary,
-                    border: `1px solid ${theme.primary}`,
-                  }}
-                  className="p-1 text-white border m-1 rounded cursor-move"
-                  onDragOver={e => dragEnter(e, i)}
-                  onDragStart={(e: any) => dragStart(e, l, i)}
-                  onDragEnd={onDrop}
-                  draggable
-                >
-                  <span className="flex flex-row justify-between items-center">
-                    <span
-                      className="border-r flex flex-row items-center w-full mr-1"
-                      style={{ fontSize: 10 }}
-                    >
-                      <MdOutlineDragIndicator fontSize={14} />
-                      <span
-                        className="ml-1"
-                        style={{
-                          whiteSpace: 'nowrap',
-                          textOverflow: 'ellipsis',
-                          overflow: 'hidden',
-                          maxWidth: '100px',
-                        }}
-                      >
-                        {l.name}
-                      </span>
-                    </span>
-                    <span className=" h-full">
-                      <AiOutlineClose
-                        onClick={() => onCloseClicked(l)}
-                        fontSize={12}
-                        cursor={'pointer'}
-                      />
-                    </span>
-                  </span>
-                </div>
-              ))
-            ) : (
-              <div className="flex flex-col border-dashed border border-t-0 h-full items-center justify-center">
-                <TbDragDrop2 fontSize={20} />
-                <span className="text-center mt-2">
-                  Drag and drop columns to measures
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
+        <InsightSidebar />
         <div
           style={{ flex: 12 }}
           className="w-full h-full flex flex-col border border-l-0 p-1"

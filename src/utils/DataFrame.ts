@@ -9,8 +9,9 @@ export default class DataFrame {
   len;
 
   constructor(props) {
+    console.log(props.data);
     this.data = Array.from(props.data);
-    this.columns = Object.keys(this.data[0]);
+    this.columns = this.data.columns;
     this.cols = {};
     this.len = props.data.length;
     this.Xs = Array.from([]);
@@ -27,14 +28,18 @@ export default class DataFrame {
   }
 
   parseColumns() {
-    this.columns.forEach(c => {
-      this.cols[c] = [];
-    });
-    this.data.forEach(d => {
+    try {
       this.columns.forEach(c => {
-        this.cols[c].push(d[c]);
+        this.cols[c] = [];
       });
-    });
+      this.data.forEach(d => {
+        this.columns.forEach(c => {
+          this.cols[c].push(d[c]);
+        });
+      });
+    } catch (error) {
+      console.log('E:: ', error);
+    }
   }
 
   maxXs() {

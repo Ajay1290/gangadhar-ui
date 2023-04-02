@@ -14,7 +14,7 @@ export type InputProps = {
   variant?: string;
   color?: string;
   innerRef?: any;
-  value?: any;
+  valuePass?: any;
 } & Omit<
   React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
@@ -33,6 +33,7 @@ export function InputBox(props: InputProps) {
         type="text"
         ref={props.innerRef}
         placeholder={props.placeholder}
+        value={props.valuePass ? props.valuePass : ''}
         {...(props as any)}
       />
       {props.endIcon && props.endIcon}

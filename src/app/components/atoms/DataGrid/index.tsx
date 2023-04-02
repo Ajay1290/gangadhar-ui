@@ -34,6 +34,7 @@ export function DataGrid(props: Props) {
 
   React.useEffect(() => {
     processRowsToDisplay(currPage);
+    console.log('props: ', props.data);
   }, [props.data, pageSize]);
 
   const processRowsToDisplay = page => {
@@ -62,7 +63,7 @@ export function DataGrid(props: Props) {
     } catch (error) {}
     setTimeout(() => {
       setIsLoading(false);
-    }, 200);
+    }, 400);
   };
 
   const onPrevPageBtnClicked = page => {
@@ -172,7 +173,7 @@ export function DataGrid(props: Props) {
                 data.rows.map((row, i) => (
                   <TableRow key={`row-${i}`}>
                     <TableCell
-                      style={{ width: 55, textAlign: 'right' }}
+                      style={{ width: 55, textAlign: 'right', ...compactStyle }}
                       key={`cell-i-(${i + 1})`}
                     >
                       {i + 1 + pageSize * (currPage - 1)}
@@ -181,6 +182,7 @@ export function DataGrid(props: Props) {
                       <TableCell
                         key={`cell-(${i},${j})`}
                         style={{
+                          ...compactStyle,
                           textAlign: Number.isNaN(
                             Number(row[col.title ? col.title : col]),
                           )

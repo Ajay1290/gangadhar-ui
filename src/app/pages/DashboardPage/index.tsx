@@ -50,19 +50,18 @@ export function DashboardPage(props: Props) {
     }
   }, []);
 
-  const getData = async measures => {
-    console.log('measures: ', measures);
+  const getData = async insight => {
+    console.log('measures: ', insight.measures);
     const res = await axios.get(
-      `http://localhost:5000/tables/${measures[0].table_id}`,
+      `http://localhost:5000/tables/${
+        insight.measures[0].table_id
+      }/query?groupBy=${insight.group_by.map(d => d.title)}&aggType=${
+        insight.agg_type
+      }`,
     );
-    const columns = measures;
-    const data = {};
+    const columns = insight.measures;
     console.log('SDA: ', res);
-    columns.forEach(c => {
-      data[c.title] = Object.values(res.data[c.title]);
-    });
-    console.log('d: ', data);
-    return { columns, rows: data };
+    return { columns, rows: res.data.data };
   };
 
   return (
@@ -86,7 +85,7 @@ export function DashboardPage(props: Props) {
                 title={insight.title}
                 id={insight.id}
                 insightType="table"
-                dataApi={getData(insight.measures)}
+                dataApi={getData(insight)}
               />
             ))}
           </div>

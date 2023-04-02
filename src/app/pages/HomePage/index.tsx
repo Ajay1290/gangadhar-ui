@@ -3,44 +3,46 @@ import { Insight } from 'app/components/molecules/Insight';
 import * as React from 'react';
 
 export function HomePage() {
-  const data = [
-    { x: 'Jan', y: 10 },
-    { x: 'Feb', y: 21 },
-    { x: 'Mar', y: 23 },
-    { x: 'Apr', y: 53 },
-    { x: 'May', y: 14 },
-    { x: 'June', y: 24 },
-    { x: 'July', y: 26 },
-    { x: 'Aug', y: 16 },
-    { x: 'Sep', y: 45 },
-    { x: 'Oct', y: 19 },
-    { x: 'Nov', y: 29 },
-    { x: 'Dec', y: 14 },
-  ];
-
-  const lineData = [
-    { x: 0, y: 10 },
-    { x: 1, y: 21 },
-    { x: 2, y: 23 },
-    { x: 3, y: 53 },
-    { x: 4, y: 14 },
-    { x: 5, y: 24 },
-    { x: 6, y: 26 },
-    { x: 7, y: 45 },
-    { x: 8, y: 4 },
-    { x: 9, y: 42 },
-    { x: 10, y: 14 },
-    { x: 11, y: 23 },
-    { x: 12, y: 23 },
-    { x: 13, y: 23 },
-    { x: 14, y: 54 },
-    { x: 15, y: 44 },
-    { x: 16, y: 20 },
-    { x: 17, y: 45 },
-    { x: 18, y: 45 },
-    { x: 19, y: 42 },
-    { x: 20, y: 14 },
-  ];
+  const data = {
+    columns: [
+      {
+        datatype: 'string',
+        id: 20,
+        name: 'Is_Exclusive',
+        table_id: 2,
+        title: 'Is Exclusive',
+      },
+    ],
+    rows: [
+      {
+        index: 0,
+        'Unnamed: 0': 0,
+        'Is Exclusive': 1,
+        'Base Value': 0,
+        Pred_NX: 28.875,
+        Pred_EX: 94,
+        Pred_SX: 27.25,
+      },
+      {
+        index: 1,
+        'Unnamed: 0': 1,
+        'Is Exclusive': 1,
+        'Base Value': 121,
+        Pred_NX: 25,
+        Pred_EX: 101.875,
+        Pred_SX: 61.875,
+      },
+      {
+        index: 2,
+        'Unnamed: 0': 2,
+        'Is Exclusive': null,
+        'Base Value': null,
+        Pred_NX: 31.125,
+        Pred_EX: 55,
+        Pred_SX: 44.375,
+      },
+    ],
+  };
 
   return (
     <PageWrapper
@@ -52,11 +54,11 @@ export function HomePage() {
         insightType="bar"
         data={data}
       ></Insight>
-      <Insight
+      {/* <Insight
         title="Sample Line Insight With Raw Data"
         insightType="line"
         data={lineData}
-      ></Insight>
+      ></Insight> */}
     </PageWrapper>
   );
 }

@@ -154,7 +154,7 @@ export function Insight(props: Props) {
     } else if (props.insightType === insightTypeEnum.Line) {
       return <LineChart height={height} width={width} data={data} />;
     } else if (props.insightType === insightTypeEnum.Table) {
-      return <DataGrid flat data={data} />;
+      return <DataGrid data={data} />;
     } else if (props.insightType === insightTypeEnum.Text) {
       return <p>{data.text}</p>;
     } else {

@@ -116,6 +116,7 @@ export function DataSourcePage(props: Props) {
                       onChange={e => {
                         setTblName(e.target.value);
                       }}
+                      valuePass={tblName}
                       placeholder="Table Name"
                     />
                   </div>
@@ -152,7 +153,7 @@ export function DataSourcePage(props: Props) {
       <div className="p-4 ">
         <div className="px-2 py-2 border-b flex flex-row justify-between items-end">
           <PageHeading>Local Data Files</PageHeading>
-          <Button title="+ New" onClick={() => setOpenUploadPopup(true)} />
+          <Button sm title="+ New" onClick={() => setOpenUploadPopup(true)} />
         </div>
         <div className="p-4 w-full h-full flex flex-col items-center justify-center">
           {isLoading ? <Loader /> : <DataGrid data={dataSourceData} />}

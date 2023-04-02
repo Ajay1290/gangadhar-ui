@@ -71,6 +71,7 @@ export function DashboardGridPage(props: Props) {
                     onChange={e => {
                       setDashboardName(e.target.value);
                     }}
+                    valuePass={dashboardName}
                     placeholder="Dashboard Name"
                   />
                 </div>
@@ -112,7 +113,11 @@ export function DashboardGridPage(props: Props) {
       <div className="p-4">
         <div className="px-2 py-2 mb-4 border-b flex flex-row justify-between items-end">
           <PageTitle>Dashboards ({dashboardsList.length})</PageTitle>
-          <Button title="+ New" onClick={() => setShowSaveModel(true)}></Button>
+          <Button
+            title="+ New"
+            sm
+            onClick={() => setShowSaveModel(true)}
+          ></Button>
         </div>
         <div className="flex flex-wrap">
           {isLoading ? (

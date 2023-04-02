@@ -18,15 +18,17 @@ export function Kpi(props: Props) {
   React.useEffect(() => {
     setColumns(props.data.columns.map(c => c.title));
     setRows(props.data.rows);
-    console.log(props.data);
-    console.log(d3, rows);
   }, [props.data]);
+
+  const count = (data, c) => {
+    return d3.count(data, (d: any) => d[c]).toFixed(0);
+  };
 
   return (
     <KPIWrapper>
       {columns.map((c, i) => (
         <KPIBody key={`kpi-${i}`}>
-          <KPIValue>{d3.count(rows[c], (d: any) => d)}</KPIValue>
+          <KPIValue>{count(rows, c)}</KPIValue>
           <KPITitle>{c}</KPITitle>
         </KPIBody>
       ))}
@@ -51,7 +53,8 @@ const KPIBody = styled.div`
 `;
 
 const KPIValue = styled.h2`
-  font-size: 20px;
+  font-size: 26px;
+  font-weight: 600;
 `;
 
 const KPITitle = styled.h1`
