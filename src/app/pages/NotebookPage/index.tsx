@@ -28,6 +28,36 @@ export function NotebookPage(props: Props) {
     fetchNotebooks();
   }, []);
 
+  const reRunAllNotebooks = () => {
+    setIsLoading(true);
+    axios
+      .post(`http://localhost:8080/api/notebook/job/${notebookId}`)
+      .then((res: any) => {
+        // setNotebook(res.data.body);
+        console.log(res.data);
+        setIsLoading(false);
+      })
+      .catch(e => {
+        console.log('E: ', e);
+        setIsLoading(false);
+      });
+  };
+
+  const stopRunningAllNotebooks = () => {
+    setIsLoading(true);
+    axios
+      .delete(`http://localhost:8080/api/notebook/job/${notebookId}`)
+      .then((res: any) => {
+        // setNotebook(res.data.body);
+        console.log(res.data);
+        setIsLoading(false);
+      })
+      .catch(e => {
+        console.log('E: ', e);
+        setIsLoading(false);
+      });
+  };
+
   const fetchNotebooks = () => {
     setIsLoading(true);
     axios
@@ -62,10 +92,9 @@ export function NotebookPage(props: Props) {
               className="py-1 w-full outline-none"
               style={{
                 resize: 'vertical',
-                maxHeight: '150px',
                 whiteSpace: 'pre-line',
               }}
-              rows={5}
+              rows={paragraph.text.split('\n').length}
               value={paragraph.text}
               onChange={e => {}}
             ></textarea>
@@ -135,8 +164,18 @@ export function NotebookPage(props: Props) {
                 <Button
                   variant="outline"
                   sm
+                  onClick={() => reRunAllNotebooks()}
                   startIcon={<VscRunAll />}
                   title="Run All"
+                />
+              </span>
+              <span className=" px-1">
+                <Button
+                  variant="outline"
+                  sm
+                  onClick={() => stopRunningAllNotebooks()}
+                  startIcon={<VscClearAll />}
+                  title="Stop All"
                 />
               </span>
               <span className=" px-1">

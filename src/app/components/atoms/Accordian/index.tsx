@@ -61,13 +61,13 @@ export function Accordian(props: Props) {
               <AiOutlineMinus
                 className="cursor-pointer"
                 onClick={() => setShow(false)}
-                fontSize={16}
+                fontSize={12}
               />
             ) : (
               <AiOutlinePlus
                 className="cursor-pointer"
                 onClick={() => setShow(true)}
-                fontSize={16}
+                fontSize={12}
               />
             )}
           </span>

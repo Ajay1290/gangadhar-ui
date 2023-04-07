@@ -1,0 +1,29 @@
+/**
+*
+* Storybook Component {{ properCase componentName }}
+*
+*/
+
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import * as React from 'react';
+import { {{ properCase componentName }} } from '.';
+
+
+export default {
+  component: {{ properCase componentName }},
+  title: '{{ properCase componentName }}',
+} as ComponentMeta<typeof {{ properCase componentName }}>;
+
+const Template: ComponentStory<typeof {{ properCase componentName }}> = (args: any) => (
+  <{{ properCase componentName }} {...args} />
+);
+
+export const Default = Template.bind({});
+
+Default.args = {
+
+};
+
+
+
+

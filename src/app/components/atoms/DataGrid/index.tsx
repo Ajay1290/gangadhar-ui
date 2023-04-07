@@ -4,6 +4,8 @@
  *
  */
 import * as React from 'react';
+import DataTable from 'react-data-table-component';
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineEye } from 'react-icons/ai';
 import styled, { useTheme } from 'styled-components/macro';
 import { Button } from '../Button';
 import { Loader } from '../Loader/Loadable';
@@ -12,6 +14,12 @@ interface Props {
   flat?: boolean;
   compact?: boolean;
   data: any;
+  editorConfig?: {
+    editable: boolean;
+    onEditClicked?: Function;
+    onViewClicked?: Function;
+    onDeleteClicked?: Function;
+  };
 }
 
 export function DataGrid(props: Props) {
@@ -34,7 +42,6 @@ export function DataGrid(props: Props) {
 
   React.useEffect(() => {
     processRowsToDisplay(currPage);
-    console.log('props: ', props.data);
   }, [props.data, pageSize]);
 
   const processRowsToDisplay = page => {
@@ -66,6 +73,10 @@ export function DataGrid(props: Props) {
     }, 400);
   };
 
+  /**
+   * Will move the table page to previous page
+   * @param page Previous Page
+   */
   const onPrevPageBtnClicked = page => {
     if (page >= 1) {
       setCurrPage(page - 1);
@@ -84,6 +95,11 @@ export function DataGrid(props: Props) {
     }
   };
 
+  /**
+   * Will current
+   * @param page Page
+   * @returns boolean
+   */
   const activeIfPageSize = page =>
     pageSize === page
       ? {
@@ -110,23 +126,29 @@ export function DataGrid(props: Props) {
                 >
                   #
                 </TableHeadCell>
-                <>
-                  {data.columns.map((col, i) => (
-                    <TableHeadCell
-                      key={`header-cell-${i}`}
-                      style={{
-                        ...compactStyle,
-                        textAlign: col.datatype
-                          ? col.datatype === 'string'
-                            ? 'left'
-                            : 'right'
-                          : 'left',
-                      }}
-                    >
-                      {col.title ? col.title : col}
-                    </TableHeadCell>
-                  ))}
-                </>
+                {data.columns.map((col, i) => (
+                  <TableHeadCell
+                    key={`header-cell-${i}`}
+                    style={{
+                      ...compactStyle,
+                      textAlign: col.datatype
+                        ? col.datatype === 'string'
+                          ? 'left'
+                          : 'right'
+                        : 'left',
+                    }}
+                  >
+                    {col.title ? col.title : col}
+                  </TableHeadCell>
+                ))}
+                {props.editorConfig?.editable && (
+                  <TableHeadCell
+                    style={{ width: 55, textAlign: 'right', ...compactStyle }}
+                    key={`header-cell-o`}
+                  >
+                    ::::
+                  </TableHeadCell>
+                )}
               </tr>
             </thead>
             <tbody className="overflow-auto">
@@ -193,6 +215,28 @@ export function DataGrid(props: Props) {
                         {row[col.title ? col.title : col]}
                       </TableCell>
                     ))}
+                    {props.editorConfig?.editable && (
+                      <TableCell
+                        style={{
+                          width: 55,
+                          textAlign: 'right',
+                          ...compactStyle,
+                        }}
+                        key={`cell-o-(${i + 1})`}
+                      >
+                        <div className="flex flex-row justify-end items-end">
+                          <span>
+                            <AiOutlineEye cursor={'pointer'} fontSize={14} />
+                          </span>
+                          <span className="px-1">
+                            <AiOutlineEdit cursor={'pointer'} fontSize={14} />
+                          </span>
+                          <span>
+                            <AiOutlineDelete cursor={'pointer'} fontSize={14} />
+                          </span>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               ) : (
@@ -303,7 +347,6 @@ const TableHeadCell = styled.th`
 `;
 
 const TableFooterBTN = styled(Button)`
-  /* border: 1px solid #e3e3e3; */
   padding: 0.5em 1em;
   border-radius: 2px;
 `;

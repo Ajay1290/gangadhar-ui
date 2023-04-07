@@ -12,6 +12,7 @@ import { Insight } from 'app/components/molecules/Insight';
 import axios from 'axios';
 import { Loader } from 'app/components/atoms/Loader';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Allotment } from 'allotment';
 
 interface Props {}
 
@@ -24,6 +25,7 @@ export function DashboardPage(props: Props) {
 
   const [dashboard, setDashboard] = React.useState({} as any);
   const { dashboardId } = useParams();
+  const [isDeleted, setIsDeleted] = React.useState(false);
 
   React.useEffect(() => {
     console.log(dashboardId);
@@ -48,7 +50,11 @@ export function DashboardPage(props: Props) {
       // TODO: Add Notification that dashboard do not exists
       navigate('/dashboards');
     }
-  }, []);
+  }, [isDeleted]);
+
+  const onDelete = () => {
+    setIsDeleted(!isDeleted);
+  };
 
   const getData = async insight => {
     console.log('measures: ', insight.measures);
@@ -61,7 +67,7 @@ export function DashboardPage(props: Props) {
     );
     const columns = insight.measures;
     console.log('SDA: ', res);
-    return { columns, rows: res.data.data };
+    return { columns, rows: res.data.data, config: insight };
   };
 
   return (
@@ -74,20 +80,26 @@ export function DashboardPage(props: Props) {
           <Loader />
         </span>
       ) : (
-        <div className="p-1">
+        <div className="p-1 h-full">
           <div className="px-2 py-2  flex flex-row justify-between items-end">
             <PageTitle>{dashboard.title}</PageTitle>
           </div>
-          <div className="p-4">
+          <div className="p-4   h-full">
+            {/* <Allotment vertical={true} css={{ overflow: 'auto' }}> */}
             {dashboard.insights.map((insight, i) => (
+              // <Allotment.Pane >
               <Insight
                 key={`inc-${i}`}
                 title={insight.title}
                 id={insight.id}
-                insightType="table"
+                groupBy={insight.group_by}
+                insightType={insight.insight_type}
                 dataApi={getData(insight)}
+                onDelete={onDelete}
               />
+              // </Allotment.Pane>
             ))}
+            {/* </Allotment> */}
           </div>
         </div>
       )}

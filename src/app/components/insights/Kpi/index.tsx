@@ -8,6 +8,7 @@ import styled from 'styled-components/macro';
 import * as d3 from 'd3';
 
 interface Props {
+  aggType: string;
   data?: any;
 }
 
@@ -16,9 +17,32 @@ export function Kpi(props: Props) {
   const [rows, setRows] = React.useState([] as any);
 
   React.useEffect(() => {
-    setColumns(props.data.columns.map(c => c.title));
-    setRows(props.data.rows);
+    console.log(props.data);
+    if (props.data.columns) {
+      setColumns(props.data.columns.map(c => c.title));
+      setRows(props.data.rows);
+    }
   }, [props.data]);
+
+  const renderValue = (data, c) => {
+    if (props.aggType == 'sum') {
+      return sum(data, c);
+    } else if (props.aggType == 'count') {
+      return count(data, c);
+    } else if (props.aggType == 'mean') {
+      return mean(data, c);
+    } else {
+      return '-';
+    }
+  };
+
+  const sum = (data, c) => {
+    return d3.sum(data, (d: any) => d[c]).toFixed(1);
+  };
+
+  const mean = (data, c) => {
+    return d3.mean(data.map((d: any) => d[c]))?.toFixed(1);
+  };
 
   const count = (data, c) => {
     return d3.count(data, (d: any) => d[c]).toFixed(0);
@@ -28,7 +52,7 @@ export function Kpi(props: Props) {
     <KPIWrapper>
       {columns.map((c, i) => (
         <KPIBody key={`kpi-${i}`}>
-          <KPIValue>{count(rows, c)}</KPIValue>
+          <KPIValue>{renderValue(rows, c)}</KPIValue>
           <KPITitle>{c}</KPITitle>
         </KPIBody>
       ))}

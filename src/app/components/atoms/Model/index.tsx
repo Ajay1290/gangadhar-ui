@@ -42,8 +42,8 @@ export function Model(props: Props) {
     >
       <ModelBox
         style={{
-          width: props.width ? props.width : '90%',
-          height: props.height ? props.height : '90%',
+          width: props.width ? props.width : '100%',
+          height: props.height ? props.height : '100%',
         }}
       >
         <div className="flex flex-row justify-between p-2 px-4 border-b">
@@ -98,6 +98,7 @@ const ModelBox = styled.div`
   width: 90%;
   z-index: 9999999;
   display: flex;
+  padding: 1em;
   flex-direction: column;
   margin: auto;
   box-shadow: 2px 2px 20px rgba(86, 86, 86, 0.6);

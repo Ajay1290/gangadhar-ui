@@ -43,15 +43,13 @@ export function DataSourcePage(props: Props) {
         setTables(res.data);
         setDataSourceData({
           columns: [
-            'title',
-            'description',
-            'data_size',
-            'rows_count',
-            'file_path',
+            { id: 0, name: 'title', title: 'title' },
+            { id: 2, name: 'data_size', title: 'data_size' },
+            { id: 3, name: 'rows_count', title: 'rows_count' },
+            { id: 4, name: 'file_path', title: 'file_path' },
           ],
           rows: res.data,
         });
-        console.log('SD');
         setIsLoading(false);
       })
       .catch(e => {
@@ -150,13 +148,17 @@ export function DataSourcePage(props: Props) {
       title="Data Source Page"
       description="A Boilerplate application homepage"
     >
-      <div className="p-4 ">
+      <div className="p-4 w-full ">
         <div className="px-2 py-2 border-b flex flex-row justify-between items-end">
           <PageHeading>Local Data Files</PageHeading>
           <Button sm title="+ New" onClick={() => setOpenUploadPopup(true)} />
         </div>
         <div className="p-4 w-full h-full flex flex-col items-center justify-center">
-          {isLoading ? <Loader /> : <DataGrid data={dataSourceData} />}
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <DataGrid editorConfig={{ editable: true }} data={dataSourceData} />
+          )}
         </div>
       </div>
       <UploadCSVModel />

@@ -50,7 +50,6 @@ const theme = {
 };
 
 root.render(
-  // <React.StrictMode>
   <Provider store={store}>
     <HelmetProvider>
       <ThemeProvider theme={theme}>
@@ -58,7 +57,6 @@ root.render(
       </ThemeProvider>
     </HelmetProvider>
   </Provider>,
-  // </React.StrictMode>,
 );
 
 // Hot reloadable translation json files

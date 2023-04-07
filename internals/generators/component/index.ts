@@ -18,6 +18,7 @@ export const enum ComponentProptNames {
   wantTranslations = 'wantTranslations',
   wantLoadable = 'wantLoadable',
   wantTests = 'wantTests',
+  wantStorybookComponent = 'wantStorybookComponent',
 }
 
 type Answers = { [P in ComponentProptNames]: string };
@@ -63,6 +64,12 @@ export const componentGenerator: PlopGeneratorConfig = {
     },
     {
       type: 'confirm',
+      name: ComponentProptNames.wantStorybookComponent,
+      default: false,
+      message: 'Do you want to add component to the storybook?',
+    },
+    {
+      type: 'confirm',
       name: ComponentProptNames.wantTests,
       default: false,
       message: 'Do you want to have tests?',
@@ -91,6 +98,15 @@ export const componentGenerator: PlopGeneratorConfig = {
         type: 'add',
         path: `${componentPath}/Loadable.ts`,
         templateFile: './component/loadable.ts.hbs',
+        abortOnFail: true,
+      });
+    }
+
+    if (answers.wantStorybookComponent) {
+      actions.push({
+        type: 'add',
+        path: `${componentPath}/${answers.componentName}.stories.tsx`,
+        templateFile: './component/story.ts.hbs',
         abortOnFail: true,
       });
     }

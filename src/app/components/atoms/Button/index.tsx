@@ -41,7 +41,7 @@ export function Button({
   const variants = {
     default:
       'rounded disabled:bg-gray-30 disabled:text-gray-50 px-5 py-1 text-base text-white font-normal ',
-    outline: 'border bg-transparent disabled:text-gray-30',
+    outline: 'border bg-transparent disabled:text-gray-30 text-inherit',
     text: 'font-semibold text-sm disabled:text-gray-30',
   };
 
@@ -51,10 +51,14 @@ export function Button({
     // const colorStyle = `text-[${color}] ${
     //   VariantButton.default === 'default' && `bg-[${backgroundColor}]`
     // }`;
+    const smStyle = sm ? `py-1 px-2 text-xs` : `py-2 px-4 text-sm`;
 
-    const fullStyle = `${fullwidth && 'w-full'}`;
+    const fullStyle = `${fullwidth && 'w-full' && smStyle}`;
 
-    return fullStyle && variantStyle;
+    if (className) {
+      return `${fullStyle && variantStyle}` && smStyle && className;
+    }
+    return `${fullStyle && variantStyle && smStyle}`;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -73,7 +77,7 @@ export function Button({
   return (
     <ButtonWrapper
       disabled={disabled}
-      className={`${getProperStyle()} ${className}`}
+      className={`${getProperStyle()} `}
       style={{
         color: variant === 'outline' ? theme.primary : theme.secondary,
         background: variant !== 'outline' ? theme.primary : 'transparent',

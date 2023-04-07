@@ -31,9 +31,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'app/components/atoms/Button';
 import { Model } from 'app/components/atoms/Model/Loadable';
 import { InputBox } from 'app/components/atoms/InputBox';
-import { LineChart } from 'app/components/atoms/LineChart/Loadable';
-import { BarChart } from 'app/components/atoms/BarChart';
-import { Kpi } from 'app/components/atoms/Kpi/Loadable';
+import { LineChart } from 'app/components/insights/LineChart/Loadable';
+import { BarChart } from 'app/components/insights/BarChart';
+import { Kpi } from 'app/components/insights/Kpi/Loadable';
+import { PieChart } from 'app/components/insights/PieChart/Loadable';
+import { MapChart } from 'app/components/insights/MapChart/Loadable';
 
 interface Props {}
 
@@ -79,19 +81,27 @@ export function Wizard(props: Props) {
       .get('http://localhost:5000/tables/all')
       .then(tblRes => {
         setTables(tblRes.data);
-
         if (insightId) {
           axios
             .get(`http://localhost:5000/insight/${insightId}`)
             .then(async res => {
+              console.log('res: ', res);
               setInsightData(res.data);
+              setSelectedInsightType({ type: res.data.insight_type });
+              setSelectedAggType({ type: res.data.agg_type });
               setSelectedTable(
                 tblRes.data.find(
                   tbl => tbl.id === res.data.measures[0].table_id,
                 ),
               );
+              setGroupingList(res.data.group_by);
               setList(res.data.measures);
-              await bringTableData(res.data.measures[0].table_id);
+              await bringTableData(
+                res.data.measures[0].table_id,
+                res.data.group_by,
+                res.data.agg_type,
+                res.data.measures,
+              );
               setTimeout(() => {
                 setIsLoading(false);
               }, 1000);
@@ -124,6 +134,7 @@ export function Wizard(props: Props) {
     table_id,
     groupList = groupingList,
     aggType = selectedAggType,
+    measureList = list,
   ) => {
     const res = await axios.get(
       `http://localhost:5000/tables/${table_id}/query?groupBy=${groupList.map(
@@ -133,7 +144,7 @@ export function Wizard(props: Props) {
     const columns = res.data.schema.fields;
     setRawDataSourceData(res.data.data as any);
     setDataSourceData({
-      columns: list,
+      columns: measureList,
       rows: res.data.data,
     });
   };
@@ -148,12 +159,12 @@ export function Wizard(props: Props) {
     } catch (error) {}
     if (Object.keys(colData).length > 0) {
       const copyListItems = type === 'grouping' ? [...groupingList] : [...list];
-      if (isInternal) {
-        copyListItems.splice(dragItem.current, 1);
-        copyListItems.splice(dragOverItem.current, 0, colData);
-      } else {
-        copyListItems.push(colData);
-      }
+      // if (isInternal) {
+      //   copyListItems.splice(dragItem.current, 1);
+      //   copyListItems.splice(dragOverItem.current, 0, colData);
+      // } else {
+      // }
+      copyListItems.push(colData);
       dragItem.current = null;
       dragOverItem.current = null;
       console.log('type: ', type);
@@ -328,12 +339,14 @@ export function Wizard(props: Props) {
                   <Button
                     className="mx-1"
                     variant="outline"
-                    title="Cancle"
+                    title="Cancel"
+                    sm
                     onClick={onCancleClicked}
                   />
                   <Button
                     className="mx-1"
                     title="Save"
+                    sm
                     onClick={onSaveClicked}
                   />
                 </div>
@@ -350,11 +363,22 @@ export function Wizard(props: Props) {
       if (selectedInsightType.type === 'table') {
         return <DataGrid compact data={dataSourceData} />;
       } else if (selectedInsightType.type === 'line') {
-        return <LineChart data={dataSourceData} height={300} width={400} />;
+        return <LineChart data={dataSourceData} height={600} width={900} />;
       } else if (selectedInsightType.type === 'bar') {
-        return <BarChart data={dataSourceData} height={300} width={400} />;
+        return (
+          <BarChart
+            data={dataSourceData}
+            groupBy={groupingList}
+            height={500}
+            width={900}
+          />
+        );
+      } else if (selectedInsightType.type === 'pie') {
+        return <PieChart data={dataSourceData} height={600} width={900} />;
       } else if (selectedInsightType.type === 'kpis') {
-        return <Kpi data={dataSourceData} />;
+        return <Kpi aggType={selectedAggType.type} data={dataSourceData} />;
+      } else if (selectedInsightType.type === 'map') {
+        return <MapChart data={dataSourceData} height={600} width={900} />;
       } else {
         return <></>;
       }
@@ -371,25 +395,25 @@ export function Wizard(props: Props) {
 
   const onInsightTypeChanged = type => {
     setSelectedInsightType({ type });
-    setList([]);
-    setGroupingList([]);
+    // setList([]);
+    // setGroupingList([]);
   };
 
   const onAggTypeChanged = async type => {
-    setSelectedAggType({ type });
     await bringTableData(selectedTable.id, groupingList, { type });
+    setSelectedAggType({ type });
   };
 
   const InsightTypeButton = ({ type }) => (
     <span
-      onClick={e => onInsightTypeChanged(type.toLowerCase())}
       style={{
-        maxWidth: 70,
+        maxWidth: 74,
         backgroundColor:
           selectedInsightType.type === type.toLowerCase() ? '#58585a' : '#FFF',
         color:
           selectedInsightType.type === type.toLowerCase() ? '#FFF' : '#58585a',
       }}
+      onClick={e => onInsightTypeChanged(type.toLowerCase())}
       className={`cursor-pointer border rounded m-1 p-2 text-xs w-full text-center mx-1`}
     >
       {type}
@@ -520,12 +544,12 @@ export function Wizard(props: Props) {
         <>
           <h6 className="border-b p-1 flex flex-row justify-between items-center">
             {type === 'grouping' ? (
-              <span>
+              <span className="py-1">
                 Group By{' '}
                 <span style={{ fontSize: 10 }}>({groupingList.length})</span>
               </span>
             ) : (
-              <span>
+              <span className="py-1">
                 Measure <span style={{ fontSize: 10 }}>({list.length})</span>
               </span>
             )}
@@ -561,15 +585,38 @@ export function Wizard(props: Props) {
           <span className="ml-1">Insight</span>
         </h6>
         <div className="w-full flex flex-row flex-wrap justify-between items-center my-1">
-          <InsightTypeButton type={'Table'} />
-          <InsightTypeButton type={'KPIs'} />
-          <InsightTypeButton type={'Bar'} />
-          <InsightTypeButton type={'Line'} />
+          <select
+            value={selectedInsightType.type}
+            onChange={e => onInsightTypeChanged(e.target.value)}
+            className={`cursor-pointer border rounded m-1 p-2 text-xs w-full  mx-1`}
+          >
+            <option value={'table'}>Table</option>
+            <option value={'kpis'}>KPIs</option>
+            <option value={'bar'}>Bar</option>
+            <option value={'line'}>Line</option>
+            <option value={'pie'}>Pie</option>
+            <option value={'map'}>Map</option>
+          </select>
         </div>
-        <div className="flex flex-row border-t border-b py-1">
-          <AggTypeButton type="Sum" />
+        <div className="flex flex-row border-t items-center justify-center border-b py-1">
+          <label htmlFor="agg-select" style={{ fontSize: 10 }}>
+            Aggregation
+          </label>
+          <select
+            id="agg-select"
+            value={selectedAggType.type}
+            style={{ fontSize: 10, outline: 'none' }}
+            onChange={e => onAggTypeChanged(e.target.value)}
+            className={`cursor-pointer border text-xs rounded m-1 p-1 w-full text-center`}
+          >
+            <option value={'sum'}>Sum</option>
+            <option value={'count'}>Count</option>
+            <option value={'min'}>Min</option>
+            <option value={'max'}>Max</option>
+          </select>
+          {/* <AggTypeButton type="Sum" />
           <AggTypeButton type="Count" />
-          <AggTypeButton type="Mean" />
+          <AggTypeButton type="Mean" /> */}
         </div>
         <MeasuresWindow type="grouping" />
         <MeasuresWindow type="measures" />
@@ -682,7 +729,7 @@ export function Wizard(props: Props) {
           </div>
           <div
             className="p-1  flex flex-col w-full"
-            style={{ height: 'calc(100% - 2rem)' }}
+            style={{ height: 'calc(100% - 3rem)' }}
           >
             <RenderInsight></RenderInsight>
           </div>

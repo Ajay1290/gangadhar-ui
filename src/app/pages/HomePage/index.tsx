@@ -1,64 +1,62 @@
 import { PageWrapper } from 'app/components/layouts/PageWrapper';
 import { Insight } from 'app/components/molecules/Insight';
 import * as React from 'react';
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+import _ from 'lodash';
+import styled from 'styled-components';
+import BoyGirlAnalytics from '../../../assets/IMG/boy_girl_analytics.jpg';
+import { Button } from 'app/components/atoms/Button/Loadable';
+import { useNavigate } from 'react-router-dom';
 
 export function HomePage() {
-  const data = {
-    columns: [
-      {
-        datatype: 'string',
-        id: 20,
-        name: 'Is_Exclusive',
-        table_id: 2,
-        title: 'Is Exclusive',
-      },
-    ],
-    rows: [
-      {
-        index: 0,
-        'Unnamed: 0': 0,
-        'Is Exclusive': 1,
-        'Base Value': 0,
-        Pred_NX: 28.875,
-        Pred_EX: 94,
-        Pred_SX: 27.25,
-      },
-      {
-        index: 1,
-        'Unnamed: 0': 1,
-        'Is Exclusive': 1,
-        'Base Value': 121,
-        Pred_NX: 25,
-        Pred_EX: 101.875,
-        Pred_SX: 61.875,
-      },
-      {
-        index: 2,
-        'Unnamed: 0': 2,
-        'Is Exclusive': null,
-        'Base Value': null,
-        Pred_NX: 31.125,
-        Pred_EX: 55,
-        Pred_SX: 44.375,
-      },
-    ],
-  };
+  const navigation = useNavigate();
 
   return (
     <PageWrapper
       title="Home Page"
       description="A Boilerplate application homepage"
     >
-      <Insight
-        title="Sample Bar Insight With Raw Data"
-        insightType="bar"
-        data={data}
-      ></Insight>
-      {/* <Insight
-        title="Sample Line Insight With Raw Data"
-        insightType="line"
-        data={lineData}
-      ></Insight> */}
+      <div className="flex flex-col h-full w-full  ">
+        <div className="p-16 flex flex-row h-full items-center justify-around">
+          <LandingTitle>
+            <div className="flex flex-col">
+              <div>
+                <div>Modern Big Data</div>
+                <div>
+                  <span style={{ letterSpacing: '1px', fontWeight: 800 }}>
+                    Analytics Platform
+                  </span>
+                </div>
+              </div>
+              <span className="m-2">
+                <Button
+                  onClick={e => {
+                    navigation('/wizards');
+                  }}
+                  title="Explore Your Data"
+                  className="px-10"
+                  variant="outline"
+                />
+              </span>
+            </div>
+          </LandingTitle>
+          <div>
+            <img
+              style={{ height: 450 }}
+              src={BoyGirlAnalytics}
+              alt="Boy & Girl Analytics"
+            />
+          </div>
+        </div>
+      </div>
     </PageWrapper>
   );
 }
+
+const LandingTitle = styled.h1`
+  font-size: 38px;
+  width: 35vw;
+  line-height: 1.2em;
+  font-weight: 500;
+`;

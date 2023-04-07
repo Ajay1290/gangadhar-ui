@@ -21,9 +21,27 @@ import { DashboardPage } from './pages/DashboardPage';
 import { NotebookPage } from './pages/NotebookPage';
 import { Wizard } from './pages/Wizard/Loadable';
 import { NotebookGridPage } from './pages/NotebookGridPage';
+import 'allotment/dist/style.css';
+import { LoginPage } from './pages/LoginPage';
+import { SignUpPage } from './pages/SignUpPage';
 
 export function App({ theme }: { theme?: any }) {
   const { i18n } = useTranslation();
+
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  const checkUserToken = () => {
+    const userToken = localStorage.getItem('user-token');
+    if (!userToken || userToken === 'undefined') {
+      setIsLoggedIn(false);
+    }
+    setIsLoggedIn(true);
+  };
+
+  React.useEffect(() => {
+    checkUserToken();
+  }, [isLoggedIn]);
+
   return (
     <BrowserRouter basename="/gangadhar-ui">
       <Helmet
@@ -42,6 +60,8 @@ export function App({ theme }: { theme?: any }) {
         <Route path="/data-source" element={<DataSourcePage />} />
         <Route path="/notebooks" element={<NotebookGridPage />} />
         <Route path="/notebooks/:notebookId" element={<NotebookPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <GlobalStyle theme={theme} />
