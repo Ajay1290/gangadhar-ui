@@ -4,16 +4,25 @@
  *
  */
 import * as React from 'react';
-import DataTable from 'react-data-table-component';
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineEye } from 'react-icons/ai';
+import {
+  AiOutlineArrowDown,
+  AiOutlineDelete,
+  AiOutlineEdit,
+  AiOutlineEye,
+  AiOutlineSortAscending,
+  AiOutlineSortDescending,
+} from 'react-icons/ai';
+import { BsSortNumericDown, BsSortNumericUp } from 'react-icons/bs';
 import styled, { useTheme } from 'styled-components/macro';
 import { Button } from '../Button';
 import { Loader } from '../Loader/Loadable';
+import DataGridFooter from './DataGridFooter';
 
 interface Props {
   flat?: boolean;
   compact?: boolean;
   data: any;
+  columnLabels?: string[];
   editorConfig?: {
     editable: boolean;
     onEditClicked?: Function;
@@ -24,11 +33,8 @@ interface Props {
 
 export function DataGrid(props: Props) {
   const theme = useTheme() as any;
-
-  const [data, setData] = React.useState({
-    columns: [] as any[],
-    rows: [] as any,
-  });
+  const [columns, setColumns] = React.useState([] as any);
+  const [rows, setRows] = React.useState([] as any);
 
   const compactStyle = props.compact
     ? { fontSize: 10, padding: '0.12em 0.5em' }
@@ -44,6 +50,24 @@ export function DataGrid(props: Props) {
     processRowsToDisplay(currPage);
   }, [props.data, pageSize]);
 
+  const onPageSizeBtnClicked = page => {
+    setPageSize(page);
+  };
+
+  const prepareColumns = cols => {
+    return cols.map(col => ({
+      ...col,
+      filter: {
+        enabled: false,
+      },
+      sort: {
+        enabled: true,
+        sortKey: col.title,
+        direction: 'asc',
+      },
+    }));
+  };
+
   const processRowsToDisplay = page => {
     setIsLoading(true);
     try {
@@ -55,16 +79,12 @@ export function DataGrid(props: Props) {
             page * pageSize,
           );
         });
-        setData({
-          columns: props.data.columns,
-          rows: d,
-        });
+        setColumns(prepareColumns(props.data.columns));
+        setRows(d);
         setRowCount(props.data.rows[props.data.columns[0].title].length);
       } else {
-        setData({
-          columns: props.data.columns,
-          rows: props.data.rows.slice((page - 1) * pageSize, page * pageSize),
-        });
+        setColumns(prepareColumns(props.data.columns));
+        setRows(pagifyData(props.data, page));
         setRowCount(props.data.rows.length);
       }
     } catch (error) {}
@@ -73,15 +93,17 @@ export function DataGrid(props: Props) {
     }, 400);
   };
 
+  const pagifyData = (data, page) => {
+    return data.rows.slice((page - 1) * pageSize, page * pageSize);
+  };
+
   /**
    * Will move the table page to previous page
    * @param page Previous Page
    */
   const onPrevPageBtnClicked = page => {
-    if (page >= 1) {
-      setCurrPage(page - 1);
-      processRowsToDisplay(page - 1);
-    }
+    setCurrPage(page - 1);
+    processRowsToDisplay(page - 1);
   };
 
   /**
@@ -89,25 +111,104 @@ export function DataGrid(props: Props) {
    * @param page Current Page Number
    */
   const onNextPageBtnClicked = page => {
-    if (page <= Math.ceil(rowCount / pageSize)) {
-      setCurrPage(page + 1);
-      processRowsToDisplay(page + 1);
-    }
+    setCurrPage(page + 1);
+    processRowsToDisplay(page + 1);
   };
 
-  /**
-   * Will current
-   * @param page Page
-   * @returns boolean
-   */
-  const activeIfPageSize = page =>
-    pageSize === page
-      ? {
-          background: theme.primary,
-          color: theme.secondary,
-          borderRadius: '50%',
+  const HeaderCell = ({ column, index }) => {
+    const onHeaderCellClicked = col => {
+      const r = props.data.rows.sort((a, b) => {
+        if (col.datatype === 'string') {
+          const x = a[col.title].toLowerCase(),
+            y = b[col.title].toLowerCase();
+
+          if (column.sort.direction === 'asc') {
+            return x < y ? -1 : x > y ? 1 : 0;
+          } else {
+            return x > y ? -1 : x < y ? 1 : 0;
+          }
+        } else {
+          return column.sort.direction === 'asc'
+            ? a[col.title] - b[col.title]
+            : b[col.title] - a[col.title];
         }
-      : {};
+      });
+      // setData({
+      //   columns: data.columns,
+      //   rows: pagifyData({ rows: r }, currPage),
+      // });
+      console.log('sorting: ', column.sort.direction);
+      column.sort.direction = column.sort.direction === 'asc' ? 'dsc' : 'asc';
+      setRows(pagifyData({ rows: r }, currPage));
+    };
+
+    return (
+      <TableHeadCell
+        onClick={() => onHeaderCellClicked(column)}
+        key={`header-cell-${index}`}
+        style={{
+          ...compactStyle,
+        }}
+      >
+        <div
+          style={{
+            flexDirection: column.datatype
+              ? column.datatype === 'string'
+                ? 'row'
+                : 'row-reverse'
+              : 'row',
+          }}
+          className="flex  items-center justify-between"
+        >
+          <span
+            className="w-full"
+            style={{
+              textAlign: column.datatype
+                ? column.datatype === 'string'
+                  ? 'left'
+                  : 'right'
+                : 'left',
+            }}
+          >
+            {props.columnLabels
+              ? props.columnLabels[index]
+              : column.title
+              ? column.title
+              : column}
+          </span>
+          <span>
+            {column.datatype === 'string' ? (
+              column.sort.direction === 'asc' ? (
+                <AiOutlineSortDescending
+                  cursor={'pointer'}
+                  color="#FFF"
+                  fontSize={props.compact ? 12 : 14}
+                />
+              ) : (
+                <AiOutlineSortAscending
+                  cursor={'pointer'}
+                  color="#FFF"
+                  fontSize={props.compact ? 12 : 14}
+                />
+              )
+            ) : column.sort.direction === 'asc' ? (
+              <BsSortNumericDown
+                cursor={'pointer'}
+                color="#FFF"
+                fontSize={props.compact ? 12 : 14}
+              />
+            ) : (
+              <BsSortNumericUp
+                cursor={'pointer'}
+                color="#FFF"
+                fontSize={props.compact ? 12 : 14}
+              />
+            )}
+          </span>
+        </div>
+      </TableHeadCell>
+    );
+  };
 
   return (
     <div className="w-full flex flex-col h-full">
@@ -122,24 +223,16 @@ export function DataGrid(props: Props) {
               <tr>
                 <TableHeadCell
                   style={{ width: 55, textAlign: 'right', ...compactStyle }}
-                  key={`header-cell-i`}
+                  key={`header-cell-ssi`}
                 >
                   #
                 </TableHeadCell>
-                {data.columns.map((col, i) => (
-                  <TableHeadCell
-                    key={`header-cell-${i}`}
-                    style={{
-                      ...compactStyle,
-                      textAlign: col.datatype
-                        ? col.datatype === 'string'
-                          ? 'left'
-                          : 'right'
-                        : 'left',
-                    }}
-                  >
-                    {col.title ? col.title : col}
-                  </TableHeadCell>
+                {columns.map((col, i) => (
+                  <HeaderCell
+                    key={`header-cell-as${i}`}
+                    column={col}
+                    index={i}
+                  />
                 ))}
                 {props.editorConfig?.editable && (
                   <TableHeadCell
@@ -153,8 +246,8 @@ export function DataGrid(props: Props) {
             </thead>
             <tbody className="overflow-auto">
               {props.flat ? (
-                Object.keys(data.rows)[0] ? (
-                  new Array(data.rows[Object.keys(data.rows)[0]].length)
+                Object.keys(rows)[0] ? (
+                  new Array(rows[Object.keys(rows)[0]].length)
                     .fill(0)
                     .map((r, i) => (
                       <TableRow key={`row-${i}`}>
@@ -168,7 +261,7 @@ export function DataGrid(props: Props) {
                         >
                           {i + 1 + pageSize * (currPage - 1)}
                         </TableCell>
-                        {data.columns.map((col, j) => (
+                        {columns.map((col, j) => (
                           <TableCell
                             key={`cell-(${i},${j})`}
                             style={{
@@ -177,22 +270,22 @@ export function DataGrid(props: Props) {
                               ...compactStyle,
                             }}
                           >
-                            {data.rows[col.title][i]}
+                            {rows[col.title][i]}
                           </TableCell>
                         ))}
                       </TableRow>
                     ))
                 ) : (
                   <tr>
-                    <td colSpan={data.columns.length + 1}>
+                    <td colSpan={columns.length + 1}>
                       <div className="h-full w-full flex flex-row items-center justify-center p-5">
                         No Rows to Display
                       </div>
                     </td>
                   </tr>
                 )
-              ) : data.rows.length > 0 ? (
-                data.rows.map((row, i) => (
+              ) : rows.length > 0 ? (
+                rows.map((row, i) => (
                   <TableRow key={`row-${i}`}>
                     <TableCell
                       style={{ width: 55, textAlign: 'right', ...compactStyle }}
@@ -200,7 +293,7 @@ export function DataGrid(props: Props) {
                     >
                       {i + 1 + pageSize * (currPage - 1)}
                     </TableCell>
-                    {data.columns.map((col, j) => (
+                    {columns.map((col, j) => (
                       <TableCell
                         key={`cell-(${i},${j})`}
                         style={{
@@ -241,7 +334,7 @@ export function DataGrid(props: Props) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={data.columns.length + 1}>
+                  <td colSpan={columns.length + 1}>
                     <div className="h-full w-full flex flex-row items-center justify-center p-5">
                       No Rows to Display
                     </div>
@@ -252,57 +345,14 @@ export function DataGrid(props: Props) {
           </table>
         </TableWrapper>
       )}
-      <div className="flex flex-row justify-between items-center p-4 border-t">
-        <div>
-          <PageSizeBtn
-            style={activeIfPageSize(5)}
-            onClick={() => setPageSize(5)}
-          >
-            5
-          </PageSizeBtn>
-          <PageSizeBtn
-            style={activeIfPageSize(10)}
-            onClick={() => setPageSize(10)}
-          >
-            10
-          </PageSizeBtn>
-          <PageSizeBtn
-            style={activeIfPageSize(20)}
-            onClick={() => setPageSize(20)}
-          >
-            20
-          </PageSizeBtn>
-          <PageSizeBtn
-            style={activeIfPageSize(50)}
-            onClick={() => setPageSize(50)}
-          >
-            50
-          </PageSizeBtn>
-        </div>
-        <div>
-          {Math.ceil(rowCount / pageSize) > 0 && (
-            <>
-              {currPage} of {Math.ceil(rowCount / pageSize)} Pages
-            </>
-          )}
-        </div>
-        <div>
-          <TableFooterBTN
-            sm
-            title="Previous"
-            variant="outline"
-            className="mx-2"
-            disabled={currPage <= 1}
-            onClick={() => onPrevPageBtnClicked(currPage)}
-          ></TableFooterBTN>
-          <TableFooterBTN
-            sm
-            title="Next"
-            disabled={currPage >= Math.ceil(rowCount / pageSize)}
-            onClick={() => onNextPageBtnClicked(currPage)}
-          ></TableFooterBTN>
-        </div>
-      </div>
+      <DataGridFooter
+        pageSize={pageSize}
+        currPage={currPage}
+        rowCount={rowCount}
+        onPageSizeBtnClicked={onPageSizeBtnClicked}
+        onNextPageBtnClicked={onNextPageBtnClicked}
+        onPrevPageBtnClicked={onPrevPageBtnClicked}
+      />
     </div>
   );
 }
@@ -344,9 +394,4 @@ const TableHeadCell = styled.th`
   background-color: ${props => props.theme.primary};
   color: ${props => props.theme.secondary};
   text-align: left;
-`;
-
-const TableFooterBTN = styled(Button)`
-  padding: 0.5em 1em;
-  border-radius: 2px;
 `;

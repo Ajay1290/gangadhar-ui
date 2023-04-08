@@ -157,7 +157,11 @@ export function DataSourcePage(props: Props) {
           {isLoading ? (
             <Loader />
           ) : (
-            <DataGrid editorConfig={{ editable: true }} data={dataSourceData} />
+            <DataGrid
+              editorConfig={{ editable: true }}
+              columnLabels={['Title', 'Data Size', 'Rows Count', 'File Path']}
+              data={dataSourceData}
+            />
           )}
         </div>
       </div>
