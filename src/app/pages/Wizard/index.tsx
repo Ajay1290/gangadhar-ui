@@ -141,7 +141,7 @@ export function Wizard(props: Props) {
         d => d.title,
       )}&aggType=${aggType.type}`,
     );
-    const columns = res.data.schema.fields;
+    // const columns = res.data.schema.fields;
     setRawDataSourceData(res.data.data as any);
     setDataSourceData({
       columns: measureList,
@@ -395,46 +395,12 @@ export function Wizard(props: Props) {
 
   const onInsightTypeChanged = type => {
     setSelectedInsightType({ type });
-    // setList([]);
-    // setGroupingList([]);
   };
 
   const onAggTypeChanged = async type => {
     await bringTableData(selectedTable.id, groupingList, { type });
     setSelectedAggType({ type });
   };
-
-  const InsightTypeButton = ({ type }) => (
-    <span
-      style={{
-        maxWidth: 74,
-        backgroundColor:
-          selectedInsightType.type === type.toLowerCase() ? '#58585a' : '#FFF',
-        color:
-          selectedInsightType.type === type.toLowerCase() ? '#FFF' : '#58585a',
-      }}
-      onClick={e => onInsightTypeChanged(type.toLowerCase())}
-      className={`cursor-pointer border rounded m-1 p-2 text-xs w-full text-center mx-1`}
-    >
-      {type}
-    </span>
-  );
-
-  const AggTypeButton = ({ type }) => (
-    <span
-      onClick={e => onAggTypeChanged(type.toLowerCase())}
-      style={{
-        maxWidth: 70,
-        fontSize: 10,
-        backgroundColor:
-          selectedAggType.type === type.toLowerCase() ? '#58585a' : '#FFF',
-        color: selectedAggType.type === type.toLowerCase() ? '#FFF' : '#58585a',
-      }}
-      className={`cursor-pointer border rounded p-1 text-xs w-full text-center mx-1`}
-    >
-      {type}
-    </span>
-  );
 
   const onTableSelect = async (isChecked, table) => {
     setList([]);
@@ -496,7 +462,7 @@ export function Wizard(props: Props) {
                 background: theme.primary,
                 border: `1px solid ${theme.primary}`,
               }}
-              className="p-1 text-white border m-1 rounded cursor-move"
+              className="p-0.5 text-white border m-1 rounded cursor-move"
               onDragOver={e => dragEnter(e, i)}
               onDragStart={(e: any) => dragStart(e, l, i)}
               onDragEnd={e => onDrop(e, type, false)}
@@ -505,9 +471,9 @@ export function Wizard(props: Props) {
               <span className="flex flex-row justify-between items-center">
                 <span
                   className="border-r flex flex-row items-center w-full mr-1"
-                  style={{ fontSize: 10 }}
+                  style={{ fontSize: 9 }}
                 >
-                  <MdOutlineDragIndicator fontSize={14} />
+                  <MdOutlineDragIndicator fontSize={12} />
                   <span
                     className="ml-1"
                     style={{
@@ -523,7 +489,7 @@ export function Wizard(props: Props) {
                 <span className=" h-full">
                   <AiOutlineClose
                     onClick={() => onCloseClicked(l, i, type)}
-                    fontSize={12}
+                    fontSize={10}
                     cursor={'pointer'}
                   />
                 </span>
@@ -531,9 +497,9 @@ export function Wizard(props: Props) {
             </div>
           ))
         ) : (
-          <div className="flex flex-col border-dashed border border-t-0 h-full items-center justify-center">
+          <div className="flex flex-col border-dashed border  h-full items-center justify-center">
             <TbDragDrop2 fontSize={20} />
-            <span className="text-center mt-2">
+            <span className="text-center mt-2" style={{ fontSize: 10 }}>
               Drag and drop columns to measures
             </span>
           </div>
@@ -542,27 +508,30 @@ export function Wizard(props: Props) {
 
       return (
         <>
-          <h6 className="border-b p-1 flex flex-row justify-between items-center">
+          <h6
+            className=" p-1 flex flex-row justify-between items-center"
+            style={{ fontSize: 10 }}
+          >
             {type === 'grouping' ? (
-              <span className="py-1">
-                Group By{' '}
-                <span style={{ fontSize: 10 }}>({groupingList.length})</span>
+              <span>
+                GROUP BY{' '}
+                <span style={{ fontSize: 9 }}>({groupingList.length})</span>
               </span>
             ) : (
-              <span className="py-1">
-                Measure <span style={{ fontSize: 10 }}>({list.length})</span>
+              <span>
+                MEASURE <span style={{ fontSize: 9 }}>({list.length})</span>
               </span>
             )}
             <span
               className="cursor-pointer"
               onClick={() => onClearAll(type)}
-              style={{ fontSize: 10 }}
+              style={{ fontSize: 9 }}
             >
               Clear All
             </span>
           </h6>
           <div
-            className="w-full h-full flex flex-col overflow-auto"
+            className="w-full h-full flex flex-col border-b overflow-auto"
             onDragOver={e => onDragOver(e)}
             onDrop={e => onDrop(e, type)}
           >
@@ -607,7 +576,7 @@ export function Wizard(props: Props) {
             value={selectedAggType.type}
             style={{ fontSize: 10, outline: 'none' }}
             onChange={e => onAggTypeChanged(e.target.value)}
-            className={`cursor-pointer border text-xs rounded m-1 p-1 w-full text-center`}
+            className={`cursor-pointer border p-1 rounded m-1 mx-2 w-full text-center`}
           >
             <option value={'sum'}>Sum</option>
             <option value={'count'}>Count</option>
@@ -620,6 +589,7 @@ export function Wizard(props: Props) {
         </div>
         <MeasuresWindow type="grouping" />
         <MeasuresWindow type="measures" />
+        <MeasuresWindow type="filter" />
         {/* <MeasuresWindow type="filters" /> */}
       </div>
     );

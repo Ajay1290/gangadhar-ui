@@ -3,6 +3,7 @@
  * DataGrid
  *
  */
+import { Menu, MenuButton, MenuItem } from '@szhsin/react-menu';
 import * as React from 'react';
 import {
   AiOutlineArrowDown,
@@ -12,7 +13,11 @@ import {
   AiOutlineSortAscending,
   AiOutlineSortDescending,
 } from 'react-icons/ai';
-import { BsSortNumericDown, BsSortNumericUp } from 'react-icons/bs';
+import {
+  BsSortNumericDown,
+  BsSortNumericUp,
+  BsThreeDotsVertical,
+} from 'react-icons/bs';
 import styled, { useTheme } from 'styled-components/macro';
 import { Button } from '../Button';
 import { Loader } from '../Loader/Loadable';
@@ -56,13 +61,13 @@ export function DataGrid(props: Props) {
 
   const prepareColumns = cols => {
     return cols.map(col => ({
-      ...col,
+      ...(col.title ? { ...col } : { title: col }),
       filter: {
         enabled: false,
       },
       sort: {
         enabled: true,
-        sortKey: col.title,
+        sortKey: col.title ? col.title : col,
         direction: 'asc',
       },
     }));
@@ -116,28 +121,32 @@ export function DataGrid(props: Props) {
   };
 
   const HeaderCell = ({ column, index }) => {
+    React.useEffect(() => {
+      // ? TODO: Check this logic later
+      if (column.datatype === undefined) {
+        column.datatype = typeof props.data.rows[0][column.title];
+      }
+    }, []);
+
     const onHeaderCellClicked = col => {
       const r = props.data.rows.sort((a, b) => {
         if (col.datatype === 'string') {
-          const x = a[col.title].toLowerCase(),
-            y = b[col.title].toLowerCase();
+          try {
+            const x = a[col.title].toLowerCase(),
+              y = b[col.title].toLowerCase();
 
-          if (column.sort.direction === 'asc') {
-            return x < y ? -1 : x > y ? 1 : 0;
-          } else {
-            return x > y ? -1 : x < y ? 1 : 0;
-          }
+            if (column.sort.direction === 'asc') {
+              return x < y ? -1 : x > y ? 1 : 0;
+            } else {
+              return x > y ? -1 : x < y ? 1 : 0;
+            }
+          } catch (error) {}
         } else {
           return column.sort.direction === 'asc'
             ? a[col.title] - b[col.title]
             : b[col.title] - a[col.title];
         }
       });
-      // setData({
-      //   columns: data.columns,
-      //   rows: pagifyData({ rows: r }, currPage),
-      // });
-      console.log('sorting: ', column.sort.direction);
       column.sort.direction = column.sort.direction === 'asc' ? 'dsc' : 'asc';
       setRows(pagifyData({ rows: r }, currPage));
     };
@@ -148,6 +157,7 @@ export function DataGrid(props: Props) {
         key={`header-cell-${index}`}
         style={{
           ...compactStyle,
+          cursor: 'pointer',
         }}
       >
         <div
@@ -177,32 +187,36 @@ export function DataGrid(props: Props) {
               : column}
           </span>
           <span>
-            {column.datatype === 'string' ? (
-              column.sort.direction === 'asc' ? (
-                <AiOutlineSortDescending
+            {column.datatype ? (
+              column.datatype === 'string' ? (
+                column.sort.direction === 'asc' ? (
+                  <AiOutlineSortDescending
+                    cursor={'pointer'}
+                    color="#FFF"
+                    fontSize={props.compact ? 12 : 14}
+                  />
+                ) : (
+                  <AiOutlineSortAscending
+                    cursor={'pointer'}
+                    color="#FFF"
+                    fontSize={props.compact ? 12 : 14}
+                  />
+                )
+              ) : column.sort.direction === 'asc' ? (
+                <BsSortNumericDown
                   cursor={'pointer'}
                   color="#FFF"
                   fontSize={props.compact ? 12 : 14}
                 />
               ) : (
-                <AiOutlineSortAscending
+                <BsSortNumericUp
                   cursor={'pointer'}
                   color="#FFF"
                   fontSize={props.compact ? 12 : 14}
                 />
               )
-            ) : column.sort.direction === 'asc' ? (
-              <BsSortNumericDown
-                cursor={'pointer'}
-                color="#FFF"
-                fontSize={props.compact ? 12 : 14}
-              />
             ) : (
-              <BsSortNumericUp
-                cursor={'pointer'}
-                color="#FFF"
-                fontSize={props.compact ? 12 : 14}
-              />
+              <></>
             )}
           </span>
         </div>
@@ -224,9 +238,7 @@ export function DataGrid(props: Props) {
                 <TableHeadCell
                   style={{ width: 55, textAlign: 'right', ...compactStyle }}
                   key={`header-cell-ssi`}
-                >
-                  #
-                </TableHeadCell>
+                ></TableHeadCell>
                 {columns.map((col, i) => (
                   <HeaderCell
                     key={`header-cell-as${i}`}
@@ -236,11 +248,9 @@ export function DataGrid(props: Props) {
                 ))}
                 {props.editorConfig?.editable && (
                   <TableHeadCell
-                    style={{ width: 55, textAlign: 'right', ...compactStyle }}
+                    style={{ width: 20, textAlign: 'right', ...compactStyle }}
                     key={`header-cell-o`}
-                  >
-                    ::::
-                  </TableHeadCell>
+                  ></TableHeadCell>
                 )}
               </tr>
             </thead>
@@ -311,14 +321,48 @@ export function DataGrid(props: Props) {
                     {props.editorConfig?.editable && (
                       <TableCell
                         style={{
-                          width: 55,
                           textAlign: 'right',
                           ...compactStyle,
+                          width: 20,
+                          borderLeft: 'none',
                         }}
                         key={`cell-o-(${i + 1})`}
                       >
                         <div className="flex flex-row justify-end items-end">
-                          <span>
+                          <Menu
+                            key={'sad'}
+                            direction={'left'}
+                            align={'end'}
+                            position={'anchor'}
+                            viewScroll={'auto'}
+                            menuButton={
+                              <MenuButton>
+                                <BsThreeDotsVertical
+                                  cursor={'pointer'}
+                                  fontSize={14}
+                                />
+                              </MenuButton>
+                            }
+                            transition
+                          >
+                            <MenuItem
+                              onClick={() =>
+                                props.editorConfig?.onViewClicked &&
+                                props.editorConfig?.onViewClicked(row)
+                              }
+                            >
+                              View
+                            </MenuItem>
+                            <MenuItem>Edit</MenuItem>
+                            <MenuItem>Delete</MenuItem>
+                          </Menu>
+
+                          {/* <span
+                            onClick={() =>
+                              props.editorConfig?.onViewClicked &&
+                              props.editorConfig?.onViewClicked(row)
+                            }
+                          >
                             <AiOutlineEye cursor={'pointer'} fontSize={14} />
                           </span>
                           <span className="px-1">
@@ -326,7 +370,7 @@ export function DataGrid(props: Props) {
                           </span>
                           <span>
                             <AiOutlineDelete cursor={'pointer'} fontSize={14} />
-                          </span>
+                          </span> */}
                         </div>
                       </TableCell>
                     )}
@@ -384,7 +428,7 @@ const TableWrapper = styled.div`
 const TableCell = styled.td`
   padding: 0.25em 1em;
   border-bottom: 1px solid #e5e5e5;
-  border-right: 1px solid #e5e5e5;
+  /* border-right: 1px solid #e5e5e5; */
 `;
 
 const TableHeadCell = styled.th`
