@@ -22,8 +22,12 @@ import { NotebookPage } from './pages/NotebookPage';
 import { Wizard } from './pages/Wizard/Loadable';
 import { NotebookGridPage } from './pages/NotebookGridPage';
 import 'allotment/dist/style.css';
+import '@szhsin/react-menu/dist/index.css';
+import '@szhsin/react-menu/dist/transitions/slide.css';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { TablePage } from './pages/TablePage';
+import { SchemaListingPage } from './pages/SchemaListingPage';
 
 export function App({ theme }: { theme?: any }) {
   const { i18n } = useTranslation();
@@ -58,6 +62,8 @@ export function App({ theme }: { theme?: any }) {
         <Route path="/dashboards" element={<DashboardGridPage />} />
         <Route path="/dashboards/:dashboardId" element={<DashboardPage />} />
         <Route path="/data-source" element={<DataSourcePage />} />
+        <Route path="/tables/:tableId" element={<TablePage />} />
+        <Route path="/schemas" element={<SchemaListingPage />} />
         <Route path="/notebooks" element={<NotebookGridPage />} />
         <Route path="/notebooks/:notebookId" element={<NotebookPage />} />
         <Route path="/login" element={<LoginPage />} />

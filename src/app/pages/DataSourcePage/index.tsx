@@ -16,6 +16,7 @@ import { InputBox } from 'app/components/atoms/InputBox';
 
 import { UploadBox } from 'app/components/molecules/UploadBox/Loadable';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {}
 
@@ -23,6 +24,7 @@ export function DataSourcePage(props: Props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // const { t, i18n } = useTranslation();
 
+  const navigate = useNavigate();
   const [openUploadPopup, setOpenUploadPopup] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [tables, setTables] = React.useState([]);
@@ -158,7 +160,12 @@ export function DataSourcePage(props: Props) {
             <Loader />
           ) : (
             <DataGrid
-              editorConfig={{ editable: true }}
+              editorConfig={{
+                editable: true,
+                onViewClicked: e => {
+                  navigate(`/tables/${e.id}`);
+                },
+              }}
               columnLabels={['Title', 'Data Size', 'Rows Count', 'File Path']}
               data={dataSourceData}
             />

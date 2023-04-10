@@ -25,6 +25,7 @@ export function Navbar(props: Props) {
           </NavMenuLink>
           <NavMenuLink to="/dashboards">Dashboards</NavMenuLink>
           <NavMenuLink to="/wizards">Wizard</NavMenuLink>
+          <NavMenuLink to="/schemas">Schemas</NavMenuLink>
           <NavMenuLink to="/data-source">Data</NavMenuLink>
           <NavMenuLink to="/notebooks">Notebooks</NavMenuLink>
         </NavMenu>

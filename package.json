@@ -7,6 +7,7 @@
     "@highcharts/map-collection": "2.0.1",
     "@observablehq/plot": "0.6.5",
     "@reduxjs/toolkit": "1.8.5",
+    "@szhsin/react-menu": "3.5.2",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "13.4.0",
     "@types/lodash": "4.14.192",
