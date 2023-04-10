@@ -14,34 +14,76 @@ import { Model } from 'app/components/atoms/Model';
 import axios from 'axios';
 import { InputBox } from 'app/components/atoms/InputBox';
 import { Loader } from 'app/components/atoms/Loader/Loadable';
+import { FiEdit3 } from 'react-icons/fi';
+import { AiOutlineDelete, AiOutlinePlus } from 'react-icons/ai';
 
 interface Props {}
 
 export function DashboardGridPage(props: Props) {
-  const [dashboardsList, setdashboardsList] = React.useState([] as any);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { t, i18n } = useTranslation();
-
+  const [dashboardsList, setDashboardsList] = React.useState([] as any);
   const [showSaveModel, setShowSaveModel] = React.useState(false);
-
   const [isLoading, setIsLoading] = React.useState(true);
+  const [selectedDashboard, setSelectedDashboard] = React.useState({} as any);
+
   React.useEffect(() => {
+    getAllDashboards();
+  }, [showSaveModel]);
+
+  const getAllDashboards = () => {
     axios
       .get('http://localhost:5000/dashboard/all')
       .then(res => {
-        setdashboardsList(res.data);
+        setDashboardsList(res.data);
         setIsLoading(false);
       })
       .catch(e => {
         setIsLoading(false);
       });
-  }, [showSaveModel]);
+  };
 
-  const SaveDashboardModel = () => {
-    const [dashboardName, setDashboardName] = React.useState('');
+  const onEditClicked = ({ title, dashboardId }) => {
+    setSelectedDashboard({ title, dashboardId });
+    setShowSaveModel(true);
+  };
+
+  const onDeleteClicked = dashboardId => {
+    axios
+      .delete(`http://localhost:5000/dashboard/delete/${dashboardId}`)
+      .then(res => {
+        console.log('res: ', res);
+        getAllDashboards();
+      })
+      .catch(err => {
+        console.log('err: ', err);
+        getAllDashboards();
+      });
+  };
+
+  const SaveDashboardModel = ({ name = '', dashboardId }) => {
+    const [dashboardName, setDashboardName] = React.useState(name);
 
     const onCancleClicked = () => {
       setShowSaveModel(false);
+      setSelectedDashboard({});
+    };
+
+    const onEditClicked = () => {
+      var formData = new FormData();
+      formData.append('dashboardName', dashboardName);
+      axios
+        .put(`http://localhost:5000/dashboard/edit/${dashboardId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .then(res => {
+          getAllDashboards();
+        })
+        .catch(err => {
+          console.log('err: ', err);
+        });
+      setShowSaveModel(false);
+      setSelectedDashboard({});
     };
 
     const onSaveClicked = () => {
@@ -53,6 +95,7 @@ export function DashboardGridPage(props: Props) {
         },
       });
       setShowSaveModel(false);
+      setSelectedDashboard({});
     };
 
     return (
@@ -60,7 +103,13 @@ export function DashboardGridPage(props: Props) {
         width="40vw"
         height="30vh"
         show={showSaveModel}
-        title="Create New Dashboard"
+        title={
+          selectedDashboard.title ? 'Edit Dashboard' : 'Create New Dashboard'
+        }
+        onClose={() => {
+          setShowSaveModel(false);
+          setSelectedDashboard({});
+        }}
       >
         <div className="flex w-full h-full items-center justify-center">
           <div className="p-2 h-full relative overflow-auto flex w-full flex-col">
@@ -80,10 +129,22 @@ export function DashboardGridPage(props: Props) {
                 <Button
                   className="mx-1"
                   variant="outline"
-                  title="Cancle"
+                  title="Cancel"
                   onClick={onCancleClicked}
                 />
-                <Button className="mx-1" title="Save" onClick={onSaveClicked} />
+                {selectedDashboard.title ? (
+                  <Button
+                    className="mx-1"
+                    title="Edit"
+                    onClick={onEditClicked}
+                  />
+                ) : (
+                  <Button
+                    className="mx-1"
+                    title="Save"
+                    onClick={onSaveClicked}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -93,14 +154,34 @@ export function DashboardGridPage(props: Props) {
   };
 
   const DashboardCard = ({ title, dashboardId, updated_on }) => (
-    <DashboardCardWrapper to={`/dashboards/${dashboardId}`}>
-      <DashboardCardTitle>{title}</DashboardCardTitle>
+    <DashboardCardWrapper>
+      <DashboardCardTitle to={`/dashboards/${dashboardId}`}>
+        {title}
+      </DashboardCardTitle>
       <div
         style={{ fontSize: 10 }}
-        className="flex flex-row justify-between border-t"
+        className="flex flex-row justify-between border-t py-1"
       >
-        <span>Modified: {updated_on}</span>
-        <span></span>
+        <span>
+          <span className="font-medium mr-1">Modified:</span>
+          <span>{new Date(updated_on).toLocaleString()}</span>
+        </span>
+        <span className="flex flex-row">
+          <span className="pl-1">
+            <FiEdit3
+              onClick={() => onEditClicked({ title, dashboardId })}
+              cursor={'pointer'}
+              fontSize={14}
+            />
+          </span>
+          <span className="pl-1">
+            <AiOutlineDelete
+              onClick={() => onDeleteClicked(dashboardId)}
+              cursor={'pointer'}
+              fontSize={14}
+            />
+          </span>
+        </span>
       </div>
     </DashboardCardWrapper>
   );
@@ -114,7 +195,8 @@ export function DashboardGridPage(props: Props) {
         <div className="px-2 py-2 mb-4 border-b flex flex-row justify-between items-end">
           <PageTitle>Dashboards ({dashboardsList.length})</PageTitle>
           <Button
-            title="+ New"
+            startIcon={<AiOutlinePlus color={'#FFF'} />}
+            title="New"
             sm
             onClick={() => setShowSaveModel(true)}
           ></Button>
@@ -136,30 +218,35 @@ export function DashboardGridPage(props: Props) {
           )}
         </div>
       </div>
-      <SaveDashboardModel />
+      <SaveDashboardModel
+        name={selectedDashboard.title}
+        dashboardId={selectedDashboard.dashboardId}
+      />
     </PageWrapper>
   );
 }
 
 const PageTitle = styled.h2`
-  /* margin-bottom: 0.25rem; */
-  /* padding: 0.25rem 0.5rem; */
   font-size: 16px;
   font-weight: 600;
+
+  :hover {
+    background-color: #f9f9f9;
+  }
 `;
 
-const DashboardCardTitle = styled.h2`
+const DashboardCardTitle = styled(Link)`
   margin-bottom: 0.25em;
   font-size: 14px;
+  cursor: pointer;
 `;
 
-const DashboardCardWrapper = styled(Link)`
+const DashboardCardWrapper = styled.div`
   border: 1px solid #e3e3e3;
   border-radius: 3px;
   padding: 0.5em 1em;
   margin: 0.51em;
   width: 250px;
-  cursor: pointer;
 
   :hover {
     background-color: #f9f9f9;
