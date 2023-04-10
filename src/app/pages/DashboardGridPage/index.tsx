@@ -67,6 +67,9 @@ export function DashboardGridPage(props: Props) {
       setSelectedDashboard({});
     };
 
+    /**
+     * Will Edit Dashboard via calling an API
+     */
     const onEditClicked = () => {
       var formData = new FormData();
       formData.append('dashboardName', dashboardName);
